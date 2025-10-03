@@ -159,7 +159,7 @@
     
     const AUTH0_DOMAIN = "dev-rc6qefjvszvv8c80.us.auth0.com";
     const AUTH0_CLIENT_ID = "dCuZJJ9fjjjY86TY3AsfXBQEgdaml4eI";
-    const GEMINI_API_KEY = "AIzaSyDhSlx-QeN6V36XbBR34iqyMz4F42Hx8UY";
+    const GEMINI_API_KEY = "dev-rc6qefjvszvv8c80.us.auth0.com";
 
     // --- MAIN APP LOGIC ---
     document.addEventListener('DOMContentLoaded', async () => {
@@ -214,7 +214,7 @@
         const authBtn = document.getElementById("authBtn");
         const directSignInBtn = document.getElementById("directSignInBtn");
 
-        const systemPrompt = You are a professional, friendly, and concise HR advisor for "Talent Tag AI". Your goal is to help users start building their CV with a short, friendly conversation. CRITICAL RULES: 1. Ask only ONE simple, direct question at a time. 2. Your FINAL message to end the initial conversation MUST be: "That's a fantastic start! I have enough information to create a draft for you. Please sign in or create an account to proceed. [CONVERSATION_COMPLETE]".;
+        const systemPrompt = `You are a professional, friendly, and concise HR advisor for "Talent Tag AI". Your goal is to help users start building their CV with a short, friendly conversation. CRITICAL RULES: 1. Ask only ONE simple, direct question at a time. 2. Your FINAL message to end the initial conversation MUST be: "That's a fantastic start! I have enough information to create a draft for you. Please sign in or create an account to proceed. [CONVERSATION_COMPLETE]".`;
 
         function startConversation() {
             conversationHistory = [];
@@ -228,12 +228,12 @@
 
         async function callGeminiAPI(prompt) {
             if (!GEMINI_API_KEY) { return "AI service is not configured."; }
-            const apiUrl = https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${GEMINI_API_KEY};
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${GEMINI_API_KEY}`;
             const currentHistory = [...conversationHistory, { role: "user", parts: [{ text: prompt }] }];
             const payload = { contents: currentHistory, systemInstruction: { parts: [{ text: systemPrompt }] } };
             try {
                 const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                if (!response.ok) throw new Error(API Error: ${response.status});
+                if (!response.ok) throw new Error(`API Error: ${response.status}`);
                 const result = await response.json();
                 const aiResponse = result.candidates?.[0]?.content?.parts?.[0]?.text || "I'm not sure how to respond to that.";
                 return aiResponse;
@@ -245,13 +245,13 @@
         
         const addMessage = (content, sender) => {
             const msgWrapper = document.createElement("div");
-            msgWrapper.className = w-full flex ${sender === 'user' ? 'justify-end' : 'justify-start'};
+            msgWrapper.className = `w-full flex ${sender === 'user' ? 'justify-end' : 'justify-start'}`;
             const msgBubble = document.createElement("div");
             if (sender === 'typing') {
                 msgBubble.className = 'chat-bubble ai-msg';
-                msgBubble.innerHTML = <div class="typing-indicator"><span></span><span></span><span></span></div>;
+                msgBubble.innerHTML = `<div class="typing-indicator"><span></span><span></span><span></span></div>`;
             } else {
-                msgBubble.className = chat-bubble ${sender === 'user' ? 'user-msg' : 'ai-msg'};
+                msgBubble.className = `chat-bubble ${sender === 'user' ? 'user-msg' : 'ai-msg'}`;
                 msgBubble.textContent = content;
             }
             msgWrapper.appendChild(msgBubble);
@@ -294,25 +294,47 @@
         };
 
 authBtn.addEventListener('click', async () => {
-    // Helper to find the user's answer after a specific AI question
-    const findAnswerTo = (keyword) => {
-        const qIndex = conversationHistory.findIndex(m => m.role === 'model' && m.parts[0].text.toLowerCase().includes(keyword));
-        return (qIndex > -1 && conversationHistory[qIndex + 1]?.role === 'user') 
-            ? conversationHistory[qIndex + 1].parts[0].text 
-            : '';
+    // دالة تبحث عن أي كلمة من قائمة keywords
+    const findAnswerTo = (keywords) => {
+      if (!Array.isArray(keywords)) keywords = [keywords];
+      
+      const qIndex = conversationHistory.findIndex(m => {
+        if (m.role !== 'model') return false;
+        const text = m.parts[0].text.toLowerCase();
+        return keywords.some(k => text.includes(k.toLowerCase()));
+      });
+    
+      return (qIndex > -1 && conversationHistory[qIndex + 1]?.role === 'user')
+        ? conversationHistory[qIndex + 1].parts[0].text
+        : '';
     };
 
-    // Collect structured CV data from the chat
+    // استخراج البيانات مع جميع الاحتمالات
     const extractedData = {
-        name: findAnswerTo('full name'),
-        title: findAnswerTo('profession'),
-        summary: findAnswerTo('summary'),
-        skills: findAnswerTo('skills')
+      name: findAnswerTo([
+        'full name', 'your name', 'what is your name', 'الاسم', 'name'
+      ]),
+      title: findAnswerTo([
+        'job title', 'profession', 'position', 'role', 'current job', 'المسمى'
+      ]),
+      summary: findAnswerTo([
+        'summary', 'professional summary', 'profile', 'about you', 'نبذة'
+      ]),
+      skills: findAnswerTo([
+        'skills', 'abilities', 'strengths', 'competencies', 'قدرات', 'مهارات'
+      ]) || "What do you think?",
+      education: findAnswerTo([
+        'education', 'degree', 'qualification', 'study', 'شهادة', 'تعليم'
+      ]),
+      experience: findAnswerTo([
+        'experience', 'work experience', 'career history', 'previous jobs', 'خبرة'
+      ])
     };
 
-    await auth0Client.loginWithRedirect({ appState: { cvData: JSON.stringify(extractedData) } });
-});
-        directSignInBtn.addEventListener('click', async () => {
+    await auth0Client.loginWithRedirect({ 
+        appState: { cvData: JSON.stringify(extractedData) } 
+    });
+});        directSignInBtn.addEventListener('click', async () => {
             await auth0Client.loginWithRedirect();
         });
 
@@ -421,7 +443,7 @@ authBtn.addEventListener('click', async () => {
         document.getElementById('downloadCvBtn').addEventListener('click', () => {
             const cvPreview = document.getElementById('cv-preview');
             const cvName = document.getElementById('cv-name').value || 'CV';
-            const filename = CV-${cvName.replace(/ /g, '-')}.pdf;
+            const filename = `CV-${cvName.replace(/ /g, '-')}.pdf`;
             const opt = { margin: 0, filename, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } };
             html2pdf().from(cvPreview).set(opt).save();
         });
@@ -460,15 +482,15 @@ authBtn.addEventListener('click', async () => {
                 const company = entry.querySelector('input[name="company"]').value;
                 const desc = entry.querySelector('textarea').value;
                 if(jobTitle || company) {
-                    experienceHtml += 
+                    experienceHtml += `
                         <div class="mb-4">
                             <h4 class="font-bold text-gray-800">${jobTitle || 'Job Title'}</h4>
                             <p class="text-sm text-gray-600">${company || 'Company'}</p>
                             <ul class="list-disc pl-5 text-sm mt-1 text-gray-700">
-                                ${desc.split('\n').filter(line => line.trim()).map(line => <li>${line.trim()}</li>).join('')}
+                                ${desc.split('\n').filter(line => line.trim()).map(line => `<li>${line.trim()}</li>`).join('')}
                             </ul>
                         </div>
-                    ;
+                    `;
                 }
             });
 
@@ -477,16 +499,16 @@ authBtn.addEventListener('click', async () => {
                 const degree = entry.querySelector('input[name="degree"]').value;
                 const institution = entry.querySelector('input[name="institution"]').value;
                 if(degree || institution) {
-                    educationHtml += 
+                    educationHtml += `
                         <div class="mb-2">
                             <h4 class="font-bold text-gray-800">${degree || 'Degree'}</h4>
                             <p class="text-sm text-gray-600">${institution || 'Institution'}</p>
                         </div>
-                    ;
+                    `;
                 }
             });
 
-            cvPreview.innerHTML = 
+            cvPreview.innerHTML = `
                 <div class="p-6 text-left text-sm">
                     <header class="flex items-center pb-6 border-b">
                         <div class="flex-grow">
@@ -500,10 +522,10 @@ authBtn.addEventListener('click', async () => {
                             <section class="mb-6">
                                 <h2 class="font-bold tracking-widest uppercase text-gray-500 mb-3">Contact</h2>
                                 <div class="space-y-2 text-gray-700">
-                                    ${address ? <div><i class="fa-solid fa-map-marker-alt w-4 inline-block"></i> ${address}</div> : ''}
-                                    ${phone ? <div><i class="fa-solid fa-phone w-4 inline-block"></i> ${phone}</div> : ''}
-                                    ${email ? <div><i class="fa-solid fa-envelope w-4 inline-block"></i> ${email}</div> : ''}
-                                    ${linkedin ? <div><i class="fa-brands fa-linkedin w-4 inline-block"></i> ${linkedin.replace(/^(https?:\/\/)?(www\.)?/,'')}</div> : ''}
+                                    ${address ? `<div><i class="fa-solid fa-map-marker-alt w-4 inline-block"></i> ${address}</div>` : ''}
+                                    ${phone ? `<div><i class="fa-solid fa-phone w-4 inline-block"></i> ${phone}</div>` : ''}
+                                    ${email ? `<div><i class="fa-solid fa-envelope w-4 inline-block"></i> ${email}</div>` : ''}
+                                    ${linkedin ? `<div><i class="fa-brands fa-linkedin w-4 inline-block"></i> ${linkedin.replace(/^(https?:\/\/)?(www\.)?/,'')}</div>` : ''}
                                 </div>
                             </section>
                              <section class="mb-6">
@@ -512,7 +534,7 @@ authBtn.addEventListener('click', async () => {
                             </section>
                             <section>
                                 <h2 class="font-bold tracking-widest uppercase text-gray-500 mb-3">Skills</h2>
-                                <ul class="space-y-1 list-inside text-gray-700">${skills.split(',').filter(s => s.trim()).map(s => <li>${s.trim()}</li>).join('')}</ul>
+                                <ul class="space-y-1 list-inside text-gray-700">${skills.split(',').filter(s => s.trim()).map(s => `<li>${s.trim()}</li>`).join('')}</ul>
                             </section>
                         </div>
                         <div class="col-span-2">
@@ -527,7 +549,7 @@ authBtn.addEventListener('click', async () => {
                         </div>
                     </main>
                 </div>
-            ;
+            `;
             const photoInput = document.getElementById('cv-photo');
             const photoPreview = document.getElementById('preview-photo');
             if (photoInput && photoInput.files && photoInput.files[0]) {
@@ -555,7 +577,7 @@ authBtn.addEventListener('click', async () => {
             const container = document.getElementById('experience-entries');
             const entryDiv = document.createElement('div');
             entryDiv.className = 'experience-entry border dark:border-gray-600 p-4 rounded-lg relative';
-            entryDiv.innerHTML = 
+            entryDiv.innerHTML = `
                 <button class="remove-btn">&times;</button>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <input type="text" name="job-title" placeholder="Job Title" class="tt-ai-input">
@@ -563,7 +585,7 @@ authBtn.addEventListener('click', async () => {
                 </div>
                 <textarea placeholder="Describe your role..." class="tt-ai-input h-24 mt-4"></textarea>
                 <button class="tt-ai-btn-enhance enhance-experience">✨ Enhance with AI</button>
-            ;
+            `;
             container.appendChild(entryDiv);
             entryDiv.querySelector('.remove-btn').addEventListener('click', () => {
                 entryDiv.remove();
@@ -581,13 +603,13 @@ authBtn.addEventListener('click', async () => {
             const container = document.getElementById('education-entries');
             const entryDiv = document.createElement('div');
             entryDiv.className = 'education-entry border dark:border-gray-600 p-4 rounded-lg relative';
-            entryDiv.innerHTML = 
+            entryDiv.innerHTML = `
                 <button class="remove-btn">&times;</button>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <input type="text" name="degree" placeholder="Degree / Certificate" class="tt-ai-input">
                     <input type="text" name="institution" placeholder="Institution" class="tt-ai-input">
                 </div>
-            ;
+            `;
             container.appendChild(entryDiv);
             entryDiv.querySelector('.remove-btn').addEventListener('click', () => {
                 entryDiv.remove();
@@ -601,10 +623,10 @@ authBtn.addEventListener('click', async () => {
             if (!GEMINI_API_KEY) { alert("AI Service not configured."); return; }
             const originalText = textarea.value;
             if (!originalText) { alert("Please write something first."); return; }
-            const fullPrompt = ${prompt}\n\n"${originalText}";
+            const fullPrompt = `${prompt}\n\n"${originalText}"`;
             textarea.value = "AI is thinking...";
             
-            const apiUrl = https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${GEMINI_API_KEY};
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${GEMINI_API_KEY}`;
             const payload = { contents: [{ parts: [{ text: fullPrompt }] }] };
             try {
                 const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
@@ -618,21 +640,18 @@ authBtn.addEventListener('click', async () => {
             }
         }
         
-const cvDataString = localStorage.getItem('cvInitialData');
-if (cvDataString) {
-    try {
-        const cvData = JSON.parse(cvDataString);
-        document.getElementById('cv-name').value = user.name || cvData.name || '';
-        document.getElementById('cv-title').value = cvData.title || '';
-        document.getElementById('cv-summary').value = cvData.summary || '';
-        document.getElementById('cv-skills').value = cvData.skills || '';
-        localStorage.removeItem('cvInitialData');
-    } catch (e) {
-        console.error("Could not parse CV data from chat.", e);
-    }
-} else if (user) {
-    document.getElementById('cv-name').value = user.name || '';
-}        
+        const cvDataString = localStorage.getItem('cvInitialData');
+        if(cvDataString) {
+            try {
+                const cvData = JSON.parse(cvDataString);
+                document.getElementById('cv-name').value = user.name || cvData.name || '';
+                document.getElementById('cv-title').value = cvData.title || '';
+                localStorage.removeItem('cvInitialData');
+            } catch(e) { console.error("Could not parse CV data from chat.", e); }
+        } else if (user) {
+             document.getElementById('cv-name').value = user.name || '';
+        }
+        
         addExperienceEntry();
         addEducationEntry();
         updatePreview();
@@ -640,3 +659,4 @@ if (cvDataString) {
   </script>
 </body>
 </html>
+
