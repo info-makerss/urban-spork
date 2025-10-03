@@ -324,7 +324,7 @@
                         <div>
                             <h3 class="text-xl font-semibold mb-4 text-blue-600 dark:text-blue-400">Professional Summary</h3>
                             <textarea id="cv-summary" placeholder="Write a brief summary..." class="tt-ai-input h-32"></textarea>
-                            <button id="enhance-summary" class="tt-ai-btn-enhance">✨ Enhance with AI</button>
+                            <button class="tt-ai-btn-enhance" data-target="cv-summary" data-prompt="Rewrite the following professional summary for a CV to be more impactful and concise.">✨ Enhance with AI</button>
                         </div>
                         <div>
                             <h3 class="text-xl font-semibold mb-4 text-blue-600 dark:text-blue-400">Work Experience</h3>
@@ -339,7 +339,7 @@
                         <div>
                             <h3 class="text-xl font-semibold mb-4 text-blue-600 dark:text-blue-400">Skills</h3>
                             <textarea id="cv-skills" placeholder="List skills, separated by commas..." class="tt-ai-input h-24"></textarea>
-                             <button id="enhance-skills" class="tt-ai-btn-enhance">✨ Enhance with AI</button>
+                             <button class="tt-ai-btn-enhance" data-target="cv-skills" data-prompt="Rewrite the following list of skills for a CV, making them more professional and comma-separated. Do not use bullet points or stars.">✨ Enhance with AI</button>
                         </div>
                     </div>
                     <div id="cv-preview-wrapper" class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
@@ -473,13 +473,13 @@
         document.querySelectorAll('.tt-ai-input, #cv-photo').forEach(input => input.addEventListener('input', updatePreview));
         document.getElementById('add-experience').addEventListener('click', addExperienceEntry);
         document.getElementById('add-education').addEventListener('click', addEducationEntry);
-        document.getElementById('enhance-summary').addEventListener('click', () => {
-             const textarea = document.getElementById('cv-summary');
-             enhanceText(textarea, "Rewrite the following professional summary for a CV to be more impactful and concise.");
-        });
-         document.getElementById('enhance-skills').addEventListener('click', () => {
-             const textarea = document.getElementById('cv-skills');
-             enhanceText(textarea, "Rewrite the following list of skills for a CV, making them more professional and comma-separated. Do not use bullet points or stars.");
+        document.querySelector('.form-section').addEventListener('click', (e) => {
+            if (e.target.matches('.tt-ai-btn-enhance')) {
+                const targetId = e.target.dataset.target;
+                const prompt = e.target.dataset.prompt;
+                const textarea = document.getElementById(targetId);
+                if (textarea) enhanceText(textarea, prompt);
+            }
         });
 
         function addExperienceEntry() {
@@ -493,14 +493,14 @@
                     <input type="text" name="company" placeholder="Company" class="tt-ai-input">
                 </div>
                 <textarea placeholder="Describe your role..." class="tt-ai-input h-24 mt-4"></textarea>
-                <button class="tt-ai-btn-enhance enhance-experience">✨ Enhance with AI</button>
+                <button class="tt-ai-btn-enhance enhance-experience" data-prompt="Rewrite the following job responsibilities for a CV as a list of bullet points, using action verbs. Do not use stars.">✨ Enhance with AI</button>
             `;
             container.appendChild(entryDiv);
             entryDiv.querySelector('.remove-btn').addEventListener('click', () => { entryDiv.remove(); updatePreview(); });
             entryDiv.querySelectorAll('input, textarea').forEach(el => el.addEventListener('input', updatePreview));
             entryDiv.querySelector('.enhance-experience').addEventListener('click', (e) => {
                 const textarea = e.target.previousElementSibling;
-                enhanceText(textarea, "Rewrite the following job responsibilities for a CV as a list of bullet points, using action verbs. Do not use stars.");
+                enhanceText(textarea, e.target.dataset.prompt);
             });
             updatePreview();
         }
