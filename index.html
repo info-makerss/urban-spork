@@ -1,645 +1,82 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Talent Tag AI – Your Career, Reimagined</title>
-  
+  <title>Talent Tag AI Builder</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <!-- Auth0 SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/@auth0/auth0-spa-js@2.0/dist/auth0-spa-js.production.js"></script>
-  
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-
-  <style>
-    /* --- CORE STYLES --- */
-    body {
-      font-family: 'Inter', sans-serif;
-      background-color: #f5f5f7;
-      color: #1d1d1f;
-    }
-    html.dark body {
-      background-color: #000;
-      color: #f5f5f7;
-    }
-
-    /* --- DYNAMIC ISLAND & FLOATING MENUS --- */
-    .floating-island {
-      background: rgba(255,255,255,0.7);
-      backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-      border: 1px solid rgba(0,0,0,0.08);
-      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    html.dark .floating-island {
-      background: rgba(29,29,31,0.75);
-      border: 1px solid rgba(255,255,255,0.1);
-    }
-    .floating-island nav {
-      max-width: 0; opacity: 0; overflow: hidden; white-space: nowrap;
-      transition: max-width 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
-    }
-    .floating-island.expanded nav {
-      max-width: 500px; opacity: 1;
-      transition: max-width 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease 0.1s;
-    }
-    html:not(.dark) .floating-island a, html:not(.dark) .floating-island button { color: #000000 !important; }
-
-    /* --- SIRI ORB BACKGROUND --- */
-    .siri-orb-container { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 600px; height: 600px; filter: blur(80px); opacity: 0.6; z-index: -1; }
-    html.dark .siri-orb-container { opacity: 0.7; }
-    .orb { position: absolute; width: 100%; height: 100%; border-radius: 50%; mix-blend-mode: screen; }
-    .orb-1 { background: radial-gradient(circle, #ff82c2, transparent 60%); animation: move1 15s infinite alternate; }
-    .orb-2 { background: radial-gradient(circle, #8c72ff, transparent 60%); animation: move2 15s infinite alternate; }
-    .orb-3 { background: radial-gradient(circle, #60efff, transparent 60%); animation: move3 15s infinite alternate; }
-    @keyframes move1 { 0% { transform: translate(0, 0) scale(1); } 50% { transform: translate(150px, 50px) scale(0.8); } 100% { transform: translate(-50px, -100px) scale(1.2); } }
-    @keyframes move2 { 0% { transform: translate(0, 0) scale(1); } 50% { transform: translate(-100px, -80px) scale(1.3); } 100% { transform: translate(120px, 100px) scale(0.9); } }
-    @keyframes move3 { 0% { transform: translate(0, 0) scale(1); } 50% { transform: translate(50px, 150px) scale(1.1); } 100% { transform: translate(-120px, -50px) scale(0.8); } }
-
-    /* --- CHAT & UI COMPONENTS --- */
-    .user-msg { background: #007aff; color: white; border-bottom-right-radius: 0.5rem; }
-    .ai-msg { background: #e5e5ea; color: #000000; border-bottom-left-radius: 0.5rem; }
-    html.dark .ai-msg { background: #2c2c2e; color: #f5f5f7; }
-    .chat-bubble { padding: 0.75rem 1.25rem; border-radius: 1.25rem; max-width: 85%; margin-bottom: 0.5rem; line-height: 1.5; white-space: pre-wrap; }
-    .typing-indicator { display: flex; align-items: center; }
-    .typing-indicator span { height: 8px; width: 8px; margin: 0 2px; background-color: #8e8e93; display: block; border-radius: 50%; opacity: 0.4; animation: typing 1s infinite; }
-    html.dark .typing-indicator span { background-color: #98989e; }
-    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
-    .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes typing { 0%, 100% { opacity: 0.4; transform: scale(0.7); } 50% { opacity: 1; transform: scale(1); } }
-    
-    /* --- CV BUILDER PAGE STYLES --- */
-    .cv-preview-name { font-family: 'Playfair Display', serif; }
-    .tt-ai-input { padding: 0.75rem; border: 1px solid #ced4da; background-color: #ffffff; border-radius: 0.5rem; width: 100%; color: #212529; transition: all 0.2s ease; }
-    html.dark .tt-ai-input { background-color: #2c2c2e; border-color: #424245; color: #f5f5f7; }
-    .tt-ai-input:focus { outline: none; border-color: #007aff; box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.25); }
-    html.dark .tt-ai-input:focus { border-color: #0a84ff; box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.35); }
-    .tt-ai-btn-enhance { margin-top: 0.5rem; background-color: #e7f5ff; color: #007aff; font-weight: 600; padding: 0.5rem 1rem; border-radius: 0.5rem; transition: background-color 0.3s ease; font-size: 0.875rem; }
-    html.dark .tt-ai-btn-enhance { background-color: rgba(10, 132, 255, 0.2); color: #0a84ff; }
-    .tt-ai-btn-add { margin-top: 0.5rem; background-color: #e9ecef; color: #495057; font-weight: 600; padding: 0.5rem 1rem; border-radius: 0.5rem; transition: background-color 0.3s ease; }
-    html.dark .tt-ai-btn-add { background-color: #2c2c2e; color: #f5f5f7; }
-    .form-section {
-      background-color: #ffffff;
-      padding: 2rem;
-      border-radius: 1rem;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-    }
-    html.dark .form-section {
-       background-color: #1c1c1e;
-       border: 1px solid #2c2c2e;
-    }
-    .remove-btn { 
-        position: absolute;
-        top: 0.5rem;
-        right: 0.5rem;
-        color: #dc3545; 
-        background: none; 
-        border: none; 
-        cursor: pointer; 
-        font-size: 1.5rem;
-        line-height: 1;
-    }
-    html.dark .remove-btn { color: #f87171; }
-
-  </style>
 </head>
-<body>
+<body class="bg-gray-900 text-white">
 
-  <div id="app-container">
-    <div class="siri-orb-container">
-        <div class="orb orb-1"></div>
-        <div class="orb orb-2"></div>
-        <div class="orb orb-3"></div>
-    </div>
+  <main class="min-h-screen w-full p-6 pt-24">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+      
+      <!-- Form Section -->
+      <div class="lg:col-span-2 bg-gray-800 rounded-2xl shadow-xl p-8 space-y-8">
+        <h2 class="text-2xl font-bold mb-4">Personal Details</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <input type="text" id="cv-name" placeholder="Full Name" class="p-3 rounded bg-gray-700 w-full">
+          <input type="text" id="cv-title" placeholder="Job Title" class="p-3 rounded bg-gray-700 w-full">
+          <input type="email" id="cv-email" placeholder="Email" class="p-3 rounded bg-gray-700 w-full">
+          <input type="tel" id="cv-phone" placeholder="Phone Number" class="p-3 rounded bg-gray-700 w-full">
+          <input type="text" id="cv-address" placeholder="Address, City" class="p-3 rounded bg-gray-700 w-full">
+          <input type="text" id="cv-linkedin" placeholder="LinkedIn Profile URL" class="p-3 rounded bg-gray-700 w-full">
+        </div>
 
-    <div id="page-1">
-        <header id="floatingMenu" class="floating-island fixed top-4 left-1/2 -translate-x-1/2 z-50 rounded-full p-2 flex items-center gap-4 shadow-xl shadow-black/5">
-            <a href="#" class="font-semibold text-md dark:text-white pl-3 pr-1 shrink-0">🌐 Talent Tag AI</a>
-            <nav class="hidden md:flex items-center gap-1 bg-black/5 dark:bg-white/5 p-1 rounded-full">
-              <a href="#" class="px-4 py-1.5 text-sm dark:text-gray-300 hover:bg-black/10 dark:hover:bg-white/10 rounded-full transition-colors">About</a>
-              <a href="#" class="px-4 py-1.5 text-sm dark:text-gray-300 hover:bg-black/10 dark:hover:bg-white/10 rounded-full transition-colors">Book Mock Interview</a>
-            </nav>
-            <div class="flex items-center gap-1">
-              <button id="themeToggle" aria-label="Toggle color theme" class="text-lg w-10 h-10 flex items-center justify-center rounded-full dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-                  <i class="fa-solid fa-sun"></i>
-              </button>
-              <button id="directSignInBtn" class="px-4 py-1.5 text-sm font-semibold bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 rounded-full transition-colors">
-                Sign In
-              </button>
+        <h2 class="text-2xl font-bold mt-6 mb-2">Professional Summary</h2>
+        <textarea id="cv-summary" placeholder="Write a brief summary about your experience and goals..." class="p-3 rounded bg-gray-700 w-full h-32"></textarea>
+
+        <h2 class="text-2xl font-bold mt-6 mb-2">Skills</h2>
+        <textarea id="cv-skills" placeholder="List your skills here..." class="p-3 rounded bg-gray-700 w-full h-24"></textarea>
+
+        <h2 class="text-2xl font-bold mt-6 mb-2">Work Experience</h2>
+        <div id="experience-entries" class="space-y-4">
+          <div class="border border-gray-600 p-4 rounded-lg">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <input type="text" placeholder="Job Title" class="p-3 rounded bg-gray-700 w-full">
+              <input type="text" placeholder="Company" class="p-3 rounded bg-gray-700 w-full">
             </div>
-        </header>
+            <textarea placeholder="Describe your role..." class="p-3 rounded bg-gray-700 w-full h-24 mt-4"></textarea>
+          </div>
+        </div>
+      </div>
 
-        <main class="min-h-screen flex flex-col justify-center items-center text-center px-4 pt-32 pb-16 relative z-10">
-            <h1 class="text-5xl md:text-7xl font-bold mb-6">Your Career, Reimagined.</h1>
-            <p class="text-lg md:text-xl mb-12 max-w-2xl">Craft a standout professional CV in minutes. Your career, accelerated by AI.</p>
-            <div class="w-full max-w-3xl bg-white/60 dark:bg-black/50 backdrop-blur-2xl border border-black/10 dark:border-white/10 rounded-2xl shadow-2xl shadow-black/5 p-6 flex flex-col gap-4">
-              <div id="chatOutput" class="flex flex-col h-72 overflow-y-auto pr-2"></div>
-              <div id="chatInputContainer" class="flex items-center gap-3 border-t border-black/10 dark:border-white/10 pt-4">
-                <input id="chatInput" type="text" placeholder="Start your CV here..." class="flex-1 px-5 py-3 rounded-full border-0 bg-black/5 dark:bg-white/5 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-black dark:text-white placeholder:text-gray-500 dark:placeholder:text-white/40">
-                <button id="sendBtn" title="Send Message" aria-label="Send message" class="p-3 w-12 h-12 flex-shrink-0 rounded-full bg-blue-600 text-white hover:bg-blue-700 active:scale-95 transition-all transform"><i class="fa-solid fa-paper-plane"></i></button>
-              </div>
-              <div id="postChatActions" class="hidden flex-col items-center gap-4 border-t border-black/10 dark:border-white/10 pt-4">
-                <p class="font-semibold">Ready to proceed?</p>
-                <button id="authBtn" class="px-6 py-3 rounded-full bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-all">Sign In / Create Account</button>
-              </div>
-            </div>
-        </main>
+      <!-- CV Preview -->
+      <div class="bg-gray-800 rounded-2xl shadow-xl p-8">
+        <h3 class="text-xl font-bold mb-4">CV Preview</h3>
+        <div id="cv-preview" class="border border-gray-700 rounded-lg p-4 h-full bg-white text-black">
+          Your CV preview will appear here.
+        </div>
+      </div>
     </div>
+  </main>
 
-    <!-- Page 2: CV Builder -->
-    <div id="page-2" class="hidden"></div>
-  
   <script>
-    // --- APP STATE & CONFIG ---
-    let auth0Client = null;
-    let conversationHistory = [];
-    
-    const AUTH0_DOMAIN = "dev-rc6qefjvszvv8c80.us.auth0.com";
-    const AUTH0_CLIENT_ID = "dCuZJJ9fjjjY86TY3AsfXBQEgdaml4eI";
-    const GEMINI_API_KEY = "AIzaSyDhSlx-QeN6V36XbBR34iqyMz4F42Hx8UY";
+    // Mapping from chat → form fields
+    const fillCvFromChat = (cvData) => {
+      document.getElementById('cv-name').value = cvData.name || '';
+      document.getElementById('cv-title').value = cvData.title || '';
+      document.getElementById('cv-email').value = cvData.email || '';
+      document.getElementById('cv-phone').value = cvData.phone || '';
+      document.getElementById('cv-summary').value = cvData.summary || '';
+      document.getElementById('cv-skills').value = cvData.skills || 'What do you think?';
+    };
 
-    // --- MAIN APP LOGIC ---
-    document.addEventListener('DOMContentLoaded', async () => {
+    // Example: simulate chat data loaded from localStorage
+    window.addEventListener("DOMContentLoaded", () => {
+      const cvDataString = localStorage.getItem('cvInitialData');
+      if (cvDataString) {
         try {
-            auth0Client = await auth0.createAuth0Client({
-                domain: AUTH0_DOMAIN,
-                clientId: AUTH0_CLIENT_ID,
-                authorizationParams: { redirect_uri: window.location.origin }
-            });
-
-            if (location.search.includes("state=") && location.search.includes("code=")) {
-                const { appState } = await auth0Client.handleRedirectCallback();
-                if(appState && appState.cvData) {
-                    localStorage.setItem('cvInitialData', appState.cvData);
-                }
-                window.history.replaceState({}, document.title, "/");
-            }
+          const cvData = JSON.parse(cvDataString);
+          fillCvFromChat(cvData);
+          localStorage.removeItem('cvInitialData');
         } catch (e) {
-            console.error("Error initializing Auth0 client:", e);
+          console.error("Could not parse CV data", e);
         }
-
-        const isAuthenticated = await auth0Client.isAuthenticated();
-        if(isAuthenticated) {
-            showPage(2);
-        } else {
-            showPage(1);
-            initializeHomepage();
-        }
+      }
     });
-
-    function showPage(page) {
-        const page1 = document.getElementById('page-1');
-        const page2 = document.getElementById('page-2');
-        if(page === 1) {
-            page1.classList.remove('hidden');
-            page2.classList.add('hidden');
-        } else {
-            page1.classList.add('hidden');
-            page2.classList.remove('hidden');
-            if(page2.innerHTML.trim() === '') {
-                injectCvBuilder(page2);
-            }
-        }
-    }
-
-    function initializeHomepage() {
-        const chatInput = document.getElementById("chatInput");
-        const sendBtn = document.getElementById("sendBtn");
-        const chatOutput = document.getElementById("chatOutput");
-        const chatInputContainer = document.getElementById("chatInputContainer");
-        const postChatActions = document.getElementById("postChatActions");
-        const authBtn = document.getElementById("authBtn");
-        const directSignInBtn = document.getElementById("directSignInBtn");
-
-        const systemPrompt = `You are a professional, friendly, and concise HR advisor for "Talent Tag AI". Your goal is to help users start building their CV with a short, friendly conversation. CRITICAL RULES: 1. Ask only ONE simple, direct question at a time. 2. Your FINAL message to end the initial conversation MUST be: "That's a fantastic start! I have enough information to create a draft for you. Please sign in or create an account to proceed. [CONVERSATION_COMPLETE]".`;
-
-        function startConversation() {
-            conversationHistory = [];
-            chatOutput.innerHTML = '';
-            chatInputContainer.classList.remove('hidden');
-            postChatActions.classList.add('hidden');
-            const initialMessage = "Hello! I'm your friendly AI career advisor. To start your CV, what is your full name?";
-            addMessage(initialMessage, 'ai');
-            conversationHistory.push({ role: "model", parts: [{ text: initialMessage }] });
-        }
-
-        async function callGeminiAPI(prompt) {
-            if (!GEMINI_API_KEY) { return "AI service is not configured."; }
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${GEMINI_API_KEY}`;
-            const currentHistory = [...conversationHistory, { role: "user", parts: [{ text: prompt }] }];
-            const payload = { contents: currentHistory, systemInstruction: { parts: [{ text: systemPrompt }] } };
-            try {
-                const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                if (!response.ok) throw new Error(`API Error: ${response.status}`);
-                const result = await response.json();
-                const aiResponse = result.candidates?.[0]?.content?.parts?.[0]?.text || "I'm not sure how to respond to that.";
-                return aiResponse;
-            } catch (error) {
-                console.error("Error calling Gemini API:", error);
-                return "Sorry, I'm having trouble connecting right now.";
-            }
-        }
-        
-        const addMessage = (content, sender) => {
-            const msgWrapper = document.createElement("div");
-            msgWrapper.className = `w-full flex ${sender === 'user' ? 'justify-end' : 'justify-start'}`;
-            const msgBubble = document.createElement("div");
-            if (sender === 'typing') {
-                msgBubble.className = 'chat-bubble ai-msg';
-                msgBubble.innerHTML = `<div class="typing-indicator"><span></span><span></span><span></span></div>`;
-            } else {
-                msgBubble.className = `chat-bubble ${sender === 'user' ? 'user-msg' : 'ai-msg'}`;
-                msgBubble.textContent = content;
-            }
-            msgWrapper.appendChild(msgBubble);
-            chatOutput.appendChild(msgWrapper);
-            chatOutput.scrollTop = chatOutput.scrollHeight;
-            return msgBubble;
-        };
-
-        const handleUserInput = async () => {
-            const userInput = chatInput.value.trim();
-            if (userInput === "") return;
-            
-            addMessage(userInput, 'user');
-            chatInput.value = "";
-            const typingIndicator = addMessage('', 'typing');
-            
-            try {
-                const aiResponse = await callGeminiAPI(userInput);
-                conversationHistory.push({ role: "user", parts: [{ text: userInput }] });
-                conversationHistory.push({ role: "model", parts: [{ text: aiResponse }] });
-                
-                if (typingIndicator.parentNode) {
-                    typingIndicator.parentNode.removeChild(typingIndicator);
-                }
-
-                if (aiResponse.includes("[CONVERSATION_COMPLETE]")) {
-                    const cleanResponse = aiResponse.replace("[CONVERSATION_COMPLETE]", "").trim();
-                    addMessage(cleanResponse, 'ai');
-                    chatInputContainer.classList.add('hidden');
-                    postChatActions.classList.remove('hidden');
-                } else {
-                    addMessage(aiResponse, 'ai');
-                }
-            } catch (error) {
-                 if (typingIndicator.parentNode) {
-                    typingIndicator.parentNode.removeChild(typingIndicator);
-                }
-                addMessage("Sorry, an error occurred.", "ai");
-            }
-        };
-
-authBtn.addEventListener('click', async () => {
-    // Helper function: يبحث عن إجابة بناءً على الكلمات المفتاحية
-    const findAnswerTo = (keywords) => {
-        const qIndex = conversationHistory.findIndex(
-            m => m.role === 'model' && keywords.some(k => m.parts[0].text.toLowerCase().includes(k))
-        );
-        return (qIndex > -1 && conversationHistory[qIndex + 1]?.role === 'user')
-            ? conversationHistory[qIndex + 1].parts[0].text
-            : '';
-    };
-
-    // نحدد الأسئلة ونربطها مع الحقول الصح
-    const extractedData = {
-        name: findAnswerTo(['full name', 'your name', 'اسمك']),
-        email: findAnswerTo(['email', 'إيميل']),
-        phone: findAnswerTo(['phone', 'رقم']),
-        title: findAnswerTo(['profession', 'job title', 'وظيفتك']),
-        summary: findAnswerTo(['summary', 'about yourself', 'profile', 'نبذة']),
-        skills: findAnswerTo(['skills', 'abilities', 'مهارات'])
-    };
-
-    if (!extractedData.skills || extractedData.skills.trim() === '') {
-        extractedData.skills = "What do you think?";
-    }
-
-    await auth0Client.loginWithRedirect({ appState: { cvData: JSON.stringify(extractedData) } });
-});
-        const menu = document.getElementById('floatingMenu');
-        if (window.matchMedia("(hover: hover)").matches) {
-            menu.addEventListener('mouseenter', () => menu.classList.add('expanded'));
-            menu.addEventListener('mouseleave', () => menu.classList.remove('expanded'));
-        }
-        const themeToggle = document.getElementById("themeToggle");
-        const icon = themeToggle.querySelector('i');
-        const setTheme = (isDark) => {
-            const html = document.documentElement;
-            if (isDark) { html.classList.add("dark"); icon.className = "fa-solid fa-moon"; localStorage.setItem('theme', 'dark'); } 
-            else { html.classList.remove("dark"); icon.className = "fa-solid fa-sun"; localStorage.setItem('theme', 'light'); }
-        };
-        const savedTheme = localStorage.getItem('theme');
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        setTheme(savedTheme ? savedTheme === 'dark' : prefersDark);
-        themeToggle.addEventListener("click", () => setTheme(!document.documentElement.classList.contains("dark")));
-        
-        chatInput.addEventListener("keypress", (e) => { if (e.key === "Enter") handleUserInput(); });
-        sendBtn.addEventListener("click", handleUserInput);
-        
-        startConversation();
-    }
-
-    async function injectCvBuilder(container) {
-        const user = await auth0Client.getUser();
-
-        container.innerHTML = `
-            <header id="cvBuilderMenu" class="floating-island fixed top-4 left-1/2 -translate-x-1/2 z-50 rounded-full p-2 flex items-center gap-4 shadow-xl shadow-black/5">
-                <a href="#" class="font-semibold text-md dark:text-white pl-3 pr-1 shrink-0">🌐 Builder</a>
-                <nav class="hidden md:flex items-center gap-1 bg-black/5 dark:bg-white/5 p-1 rounded-full">
-                    <button id="downloadCvBtn" class="px-4 py-1.5 text-sm dark:text-gray-300 hover:bg-black/10 dark:hover:bg-white/10 rounded-full transition-colors">Download</button>
-                    <button id="logoutBtn" class="px-4 py-1.5 text-sm dark:text-gray-300 hover:bg-black/10 dark:hover:bg-white/10 rounded-full transition-colors">Logout</button>
-                </nav>
-                <div class="flex items-center gap-1">
-                    <button id="cvThemeToggle" class="text-lg w-10 h-10 flex items-center justify-center rounded-full dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-                        <i class="fa-solid fa-sun"></i>
-                    </button>
-                    <img src="${user.picture}" alt="User" class="w-8 h-8 rounded-full">
-                </div>
-            </header>
-            <main class="min-h-screen w-full p-6 pt-28">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-                    <div class="lg:col-span-2 form-section space-y-8">
-                        
-                        <div>
-                            <h3 class="text-xl font-semibold mb-4 text-blue-600 dark:text-blue-400">Personal Details</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label for="cv-photo" class="block mb-2 text-sm font-medium">Profile Picture</label>
-                                    <input type="file" id="cv-photo" accept="image/*" class="block w-full text-sm border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none dark:bg-gray-700 dark:border-gray-600">
-                                </div>
-                                <div></div>
-                                <input type="text" id="cv-name" placeholder="Full Name" class="tt-ai-input">
-                                <input type="text" id="cv-title" placeholder="Job Title" class="tt-ai-input">
-                                <input type="email" id="cv-email" placeholder="Email" class="tt-ai-input" value="${user.email || ''}">
-                                <input type="tel" id="cv-phone" placeholder="Phone Number" class="tt-ai-input">
-                                <input type="text" id="cv-address" placeholder="Address, City" class="tt-ai-input">
-                                <input type="text" id="cv-linkedin" placeholder="LinkedIn Profile URL" class="tt-ai-input">
-                            </div>
-                        </div>
-
-                        <div>
-                            <h3 class="text-xl font-semibold mb-4 text-blue-600 dark:text-blue-400">Professional Summary</h3>
-                            <textarea id="cv-summary" placeholder="Write a brief summary about your experience and goals..." class="tt-ai-input h-32"></textarea>
-                            <button id="enhance-summary" class="tt-ai-btn-enhance">✨ Enhance with AI</button>
-                        </div>
-
-                        <div>
-                            <h3 class="text-xl font-semibold mb-4 text-blue-600 dark:text-blue-400">Work Experience</h3>
-                            <div id="experience-entries" class="space-y-4"></div>
-                            <button id="add-experience" class="tt-ai-btn-add">+ Add Experience</button>
-                        </div>
-                        
-                        <div>
-                            <h3 class="text-xl font-semibold mb-4 text-blue-600 dark:text-blue-400">Education</h3>
-                            <div id="education-entries" class="space-y-4"></div>
-                            <button id="add-education" class="tt-ai-btn-add">+ Add Education</button>
-                        </div>
-
-                        <div>
-                            <h3 class="text-xl font-semibold mb-4 text-blue-600 dark:text-blue-400">Skills</h3>
-                            <textarea id="cv-skills" placeholder="List your skills, separated by commas..." class="tt-ai-input h-24"></textarea>
-                             <button id="enhance-skills" class="tt-ai-btn-enhance">✨ Enhance with AI</button>
-                        </div>
-                        
-                        <div>
-                            <h3 class="text-xl font-semibold mb-4 text-blue-600 dark:text-blue-400">Languages</h3>
-                            <input type="text" id="cv-languages" placeholder="e.g., Arabic, English" class="tt-ai-input">
-                        </div>
-
-                    </div>
-                    <div id="cv-preview-wrapper" class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
-                        <div id="cv-preview" class="h-full bg-white text-black rounded-lg overflow-y-auto">
-                           <!-- CV Preview will be rendered here -->
-                        </div>
-                    </div>
-                </div>
-            </main>
-        `;
-
-        // --- ATTACH LISTENERS FOR CV BUILDER ---
-        document.getElementById('logoutBtn').addEventListener('click', () => auth0Client.logout({ logoutParams: { returnTo: window.location.origin } }));
-        document.getElementById('downloadCvBtn').addEventListener('click', () => {
-            const cvPreview = document.getElementById('cv-preview');
-            const cvName = document.getElementById('cv-name').value || 'CV';
-            const filename = `CV-${cvName.replace(/ /g, '-')}.pdf`;
-            const opt = { margin: 0, filename, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } };
-            html2pdf().from(cvPreview).set(opt).save();
-        });
-        
-        const cvThemeToggle = document.getElementById('cvThemeToggle');
-        const icon = cvThemeToggle.querySelector('i');
-        const setTheme = (isDark) => {
-            const html = document.documentElement;
-            if (isDark) { html.classList.add("dark"); icon.className = "fa-solid fa-moon"; localStorage.setItem('theme', 'dark'); } 
-            else { html.classList.remove("dark"); icon.className = "fa-solid fa-sun"; localStorage.setItem('theme', 'light'); }
-        };
-        const savedTheme = localStorage.getItem('theme');
-        setTheme(savedTheme === 'dark');
-        cvThemeToggle.addEventListener('click', () => setTheme(!document.documentElement.classList.contains("dark")));
-        
-        const cvBuilderMenu = document.getElementById('cvBuilderMenu');
-        if (window.matchMedia("(hover: hover)").matches) {
-            cvBuilderMenu.addEventListener('mouseenter', () => cvBuilderMenu.classList.add('expanded'));
-            cvBuilderMenu.addEventListener('mouseleave', () => cvBuilderMenu.classList.remove('expanded'));
-        }
-
-        function updatePreview() {
-            const cvPreview = document.getElementById('cv-preview');
-            const name = document.getElementById('cv-name').value;
-            const title = document.getElementById('cv-title').value;
-            const phone = document.getElementById('cv-phone').value;
-            const email = document.getElementById('cv-email').value;
-            const address = document.getElementById('cv-address').value;
-            const linkedin = document.getElementById('cv-linkedin').value;
-            const summary = document.getElementById('cv-summary').value;
-            const skills = document.getElementById('cv-skills').value;
-            
-            let experienceHtml = '';
-            document.querySelectorAll('#experience-entries .experience-entry').forEach(entry => {
-                const jobTitle = entry.querySelector('input[name="job-title"]').value;
-                const company = entry.querySelector('input[name="company"]').value;
-                const desc = entry.querySelector('textarea').value;
-                if(jobTitle || company) {
-                    experienceHtml += `
-                        <div class="mb-4">
-                            <h4 class="font-bold text-gray-800">${jobTitle || 'Job Title'}</h4>
-                            <p class="text-sm text-gray-600">${company || 'Company'}</p>
-                            <ul class="list-disc pl-5 text-sm mt-1 text-gray-700">
-                                ${desc.split('\n').filter(line => line.trim()).map(line => `<li>${line.trim()}</li>`).join('')}
-                            </ul>
-                        </div>
-                    `;
-                }
-            });
-
-            let educationHtml = '';
-            document.querySelectorAll('#education-entries .education-entry').forEach(entry => {
-                const degree = entry.querySelector('input[name="degree"]').value;
-                const institution = entry.querySelector('input[name="institution"]').value;
-                if(degree || institution) {
-                    educationHtml += `
-                        <div class="mb-2">
-                            <h4 class="font-bold text-gray-800">${degree || 'Degree'}</h4>
-                            <p class="text-sm text-gray-600">${institution || 'Institution'}</p>
-                        </div>
-                    `;
-                }
-            });
-
-            cvPreview.innerHTML = `
-                <div class="p-6 text-left text-sm">
-                    <header class="flex items-center pb-6 border-b">
-                        <div class="flex-grow">
-                            <h1 class="text-4xl font-bold cv-preview-name text-gray-900">${name || 'Your Name'}</h1>
-                            <p class="text-gray-500 tracking-widest mt-1">${title || 'PROFESSIONAL TITLE'}</p>
-                        </div>
-                        <img id="preview-photo" src="https://placehold.co/100x100/e2e8f0/e2e8f0?text= " class="w-24 h-24 rounded-full object-cover bg-gray-200">
-                    </header>
-                    <main class="grid grid-cols-3 gap-6 mt-6">
-                        <div class="col-span-1 text-xs">
-                            <section class="mb-6">
-                                <h2 class="font-bold tracking-widest uppercase text-gray-500 mb-3">Contact</h2>
-                                <div class="space-y-2 text-gray-700">
-                                    ${address ? `<div><i class="fa-solid fa-map-marker-alt w-4 inline-block"></i> ${address}</div>` : ''}
-                                    ${phone ? `<div><i class="fa-solid fa-phone w-4 inline-block"></i> ${phone}</div>` : ''}
-                                    ${email ? `<div><i class="fa-solid fa-envelope w-4 inline-block"></i> ${email}</div>` : ''}
-                                    ${linkedin ? `<div><i class="fa-brands fa-linkedin w-4 inline-block"></i> ${linkedin.replace(/^(https?:\/\/)?(www\.)?/,'')}</div>` : ''}
-                                </div>
-                            </section>
-                             <section class="mb-6">
-                                <h2 class="font-bold tracking-widest uppercase text-gray-500 mb-3">Education</h2>
-                                <div class="space-y-3">${educationHtml || '<p class="text-gray-500">Your education here...</p>'}</div>
-                            </section>
-                            <section>
-                                <h2 class="font-bold tracking-widest uppercase text-gray-500 mb-3">Skills</h2>
-                                <ul class="space-y-1 list-inside text-gray-700">${skills.split(',').filter(s => s.trim()).map(s => `<li>${s.trim()}</li>`).join('')}</ul>
-                            </section>
-                        </div>
-                        <div class="col-span-2">
-                            <section class="mb-6">
-                                <h2 class="font-bold tracking-widest uppercase text-gray-500 mb-3">Professional Profile</h2>
-                                <p class="text-xs leading-relaxed text-gray-700">${summary || 'Your summary here...'}</p>
-                            </section>
-                            <section>
-                                <h2 class="font-bold tracking-widest uppercase text-gray-500 mb-3">Work Experience</h2>
-                                <div class="space-y-4">${experienceHtml || '<p class="text-gray-500">Your work experience here...</p>'}</div>
-                            </section>
-                        </div>
-                    </main>
-                </div>
-            `;
-            const photoInput = document.getElementById('cv-photo');
-            const photoPreview = document.getElementById('preview-photo');
-            if (photoInput && photoInput.files && photoInput.files[0]) {
-                const reader = new FileReader();
-                reader.onload = e => { if(photoPreview) photoPreview.src = e.target.result; }
-                reader.readAsDataURL(photoInput.files[0]);
-            }
-        }
-        
-        document.querySelectorAll('.tt-ai-input, #cv-photo').forEach(input => input.addEventListener('input', updatePreview));
-
-        document.getElementById('add-experience').addEventListener('click', addExperienceEntry);
-        document.getElementById('add-education').addEventListener('click', addEducationEntry);
-
-        document.getElementById('enhance-summary').addEventListener('click', () => {
-             const textarea = document.getElementById('cv-summary');
-             enhanceText(textarea, "Rewrite the following professional summary for a CV to be more impactful and concise.");
-        });
-         document.getElementById('enhance-skills').addEventListener('click', () => {
-             const textarea = document.getElementById('cv-skills');
-             enhanceText(textarea, "Rewrite the following list of skills for a CV, making them more professional and comma-separated. Do not use bullet points or stars.");
-        });
-
-        function addExperienceEntry() {
-            const container = document.getElementById('experience-entries');
-            const entryDiv = document.createElement('div');
-            entryDiv.className = 'experience-entry border dark:border-gray-600 p-4 rounded-lg relative';
-            entryDiv.innerHTML = `
-                <button class="remove-btn">&times;</button>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input type="text" name="job-title" placeholder="Job Title" class="tt-ai-input">
-                    <input type="text" name="company" placeholder="Company" class="tt-ai-input">
-                </div>
-                <textarea placeholder="Describe your role..." class="tt-ai-input h-24 mt-4"></textarea>
-                <button class="tt-ai-btn-enhance enhance-experience">✨ Enhance with AI</button>
-            `;
-            container.appendChild(entryDiv);
-            entryDiv.querySelector('.remove-btn').addEventListener('click', () => {
-                entryDiv.remove();
-                updatePreview();
-            });
-            entryDiv.querySelectorAll('input, textarea').forEach(el => el.addEventListener('input', updatePreview));
-            entryDiv.querySelector('.enhance-experience').addEventListener('click', (e) => {
-                const textarea = e.target.previousElementSibling;
-                enhanceText(textarea, "Rewrite the following job responsibilities for a CV as a list of bullet points, using action verbs. Do not use stars.");
-            });
-            updatePreview();
-        }
-        
-        function addEducationEntry() {
-            const container = document.getElementById('education-entries');
-            const entryDiv = document.createElement('div');
-            entryDiv.className = 'education-entry border dark:border-gray-600 p-4 rounded-lg relative';
-            entryDiv.innerHTML = `
-                <button class="remove-btn">&times;</button>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input type="text" name="degree" placeholder="Degree / Certificate" class="tt-ai-input">
-                    <input type="text" name="institution" placeholder="Institution" class="tt-ai-input">
-                </div>
-            `;
-            container.appendChild(entryDiv);
-            entryDiv.querySelector('.remove-btn').addEventListener('click', () => {
-                entryDiv.remove();
-                updatePreview();
-            });
-            entryDiv.querySelectorAll('input').forEach(el => el.addEventListener('input', updatePreview));
-            updatePreview();
-        }
-
-        async function enhanceText(textarea, prompt) {
-            if (!GEMINI_API_KEY) { alert("AI Service not configured."); return; }
-            const originalText = textarea.value;
-            if (!originalText) { alert("Please write something first."); return; }
-            const fullPrompt = `${prompt}\n\n"${originalText}"`;
-            textarea.value = "AI is thinking...";
-            
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${GEMINI_API_KEY}`;
-            const payload = { contents: [{ parts: [{ text: fullPrompt }] }] };
-            try {
-                const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                if (!response.ok) throw new Error("API Error");
-                const result = await response.json();
-                textarea.value = result.candidates?.[0]?.content?.parts?.[0]?.text.replace(/[*]/g, '') || originalText;
-                updatePreview();
-            } catch (e) {
-                textarea.value = originalText;
-                alert("AI enhancement failed.");
-            }
-        }
-        
-const cvDataString = localStorage.getItem('cvInitialData');
-if (cvDataString) {
-    try {
-        const cvData = JSON.parse(cvDataString);
-        document.getElementById('cv-name').value = user.name || cvData.name || '';
-        document.getElementById('cv-title').value = cvData.title || '';
-        document.getElementById('cv-summary').value = cvData.summary || '';
-        document.getElementById('cv-email').value = cvData.email || '';
-        document.getElementById('cv-phone').value = cvData.phone || '';
-        document.getElementById('cv-skills').value = cvData.skills || 'What do you think?';
-        localStorage.removeItem('cvInitialData');
-    } catch (e) {
-        console.error("Could not parse CV data from chat.", e);
-    }
-} else if (user) {
-    document.getElementById('cv-name').value = user.name || '';
-    document.getElementById('cv-email').value = user.email || '';
-}  </script>
+  </script>
 </body>
 </html>
-
