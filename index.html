@@ -103,6 +103,18 @@
         line-height: 1;
     }
     html.dark .remove-btn { color: #f87171; }
+    .input-with-ai-check { position: relative; }
+    .ai-check-btn {
+        position: absolute;
+        top: 50%;
+        right: 0.5rem;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #adb5bd;
+        cursor: pointer;
+    }
+    .ai-check-btn:hover { color: #007aff; }
 
   </style>
 </head>
@@ -156,7 +168,6 @@
   <script>
     // --- APP STATE & CONFIG ---
     let auth0Client = null;
-    let conversationHistory = [];
     
     const AUTH0_DOMAIN = "dev-rc6qefjvszvv8c80.us.auth0.com";
     const AUTH0_CLIENT_ID = "dCuZJJ9fjjjY86TY3AsfXBQEgdaml4eI";
@@ -210,14 +221,14 @@
         const chatInput = document.getElementById("chatInput");
         const sendBtn = document.getElementById("sendBtn");
         const chatOutput = document.getElementById("chatOutput");
+        let conversationHistory = [];
 
         const systemPrompt = `You are a professional, friendly HR advisor. Your goal is to answer user questions about CVs, job searching, and interview preparation. Keep your answers helpful and concise.`;
 
-        async function callGeminiAPI(prompt) {
+        async function callGeminiAPI(history) {
             if (!GEMINI_API_KEY) { return "AI service is not configured."; }
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${GEMINI_API_KEY}`;
-            const currentHistory = [...conversationHistory, { role: "user", parts: [{ text: prompt }] }];
-            const payload = { contents: currentHistory, systemInstruction: { parts: [{ text: systemPrompt }] } };
+            const payload = { contents: history, systemInstruction: { parts: [{ text: systemPrompt }] } };
             try {
                 const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 if (!response.ok) throw new Error(`API Error: ${response.status}`);
@@ -252,12 +263,14 @@
             
             addMessage(userInput, 'user');
             chatInput.value = "";
+            
+            const newHistory = [...conversationHistory, { role: "user", parts: [{ text: userInput }] }];
             const typingIndicator = addMessage('', 'typing');
             
             try {
-                const aiResponse = await callGeminiAPI(userInput);
-                conversationHistory.push({ role: "user", parts: [{ text: userInput }] });
-                conversationHistory.push({ role: "model", parts: [{ text: aiResponse }] });
+                const aiResponse = await callGeminiAPI(newHistory);
+                conversationHistory = [...newHistory, { role: "model", parts: [{ text: aiResponse }] }];
+                
                 if (typingIndicator.parentNode) typingIndicator.parentNode.removeChild(typingIndicator);
                 addMessage(aiResponse, 'ai');
             } catch (error) {
@@ -549,6 +562,4 @@
   </script>
 </body>
 </html>
-
-
 
