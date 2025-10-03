@@ -293,18 +293,32 @@
             }
         };
 
-        authBtn.addEventListener('click', async () => {
-            const findAnswerTo = (question) => {
-                const qIndex = conversationHistory.findIndex(m => m.role === 'model' && m.parts[0].text.toLowerCase().includes(question));
-                return (qIndex > -1 && conversationHistory[qIndex + 1]?.role === 'user') ? conversationHistory[qIndex + 1].parts[0].text : '';
-            }
-            const extractedData = {
-                name: findAnswerTo('full name'),
-                title: findAnswerTo('profession')
-            };
-            await auth0Client.loginWithRedirect({ appState: { cvData: JSON.stringify(extractedData) } });
-        });
-        directSignInBtn.addEventListener('click', async () => {
+authBtn.addEventListener('click', async () => {
+    // Helper: يبحث عن إجابة المستخدم لأي سؤال يحتوي أي كلمة من هالقائمة
+    const findAnswerTo = (keywords) => {
+        const qIndex = conversationHistory.findIndex(
+            m => m.role === 'model' && keywords.some(k => m.parts[0].text.toLowerCase().includes(k))
+        );
+        return (qIndex > -1 && conversationHistory[qIndex + 1]?.role === 'user')
+            ? conversationHistory[qIndex + 1].parts[0].text
+            : '';
+    };
+
+    // نخزن البيانات المستخرجة
+    const extractedData = {
+        name: findAnswerTo(['full name', 'your name', 'name']),
+        title: findAnswerTo(['profession', 'job title', 'career']),
+        summary: findAnswerTo(['summary', 'about yourself', 'profile']),
+        skills: findAnswerTo(['skills', 'abilities', 'strengths'])
+    };
+
+    // إذا skills فاضية → نحط اقتراح
+    if (!extractedData.skills || extractedData.skills.trim() === '') {
+        extractedData.skills = "What do you think?";
+    }
+
+    await auth0Client.loginWithRedirect({ appState: { cvData: JSON.stringify(extractedData) } });
+});        directSignInBtn.addEventListener('click', async () => {
             await auth0Client.loginWithRedirect();
         });
 
@@ -610,19 +624,21 @@
             }
         }
         
-        const cvDataString = localStorage.getItem('cvInitialData');
-        if(cvDataString) {
-            try {
-                const cvData = JSON.parse(cvDataString);
-                document.getElementById('cv-name').value = user.name || cvData.name || '';
-                document.getElementById('cv-title').value = cvData.title || '';
-                localStorage.removeItem('cvInitialData');
-            } catch(e) { console.error("Could not parse CV data from chat.", e); }
-        } else if (user) {
-             document.getElementById('cv-name').value = user.name || '';
-        }
-        
-        addExperienceEntry();
+const cvDataString = localStorage.getItem('cvInitialData');
+if (cvDataString) {
+    try {
+        const cvData = JSON.parse(cvDataString);
+        document.getElementById('cv-name').value = user.name || cvData.name || '';
+        document.getElementById('cv-title').value = cvData.title || '';
+        document.getElementById('cv-summary').value = cvData.summary || '';
+        document.getElementById('cv-skills').value = cvData.skills || 'What do you think?';
+        localStorage.removeItem('cvInitialData');
+    } catch (e) {
+        console.error("Could not parse CV data from chat.", e);
+    }
+} else if (user) {
+    document.getElementById('cv-name').value = user.name || '';
+}        addExperienceEntry();
         addEducationEntry();
         updatePreview();
     }
