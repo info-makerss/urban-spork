@@ -294,7 +294,7 @@
         };
 
 authBtn.addEventListener('click', async () => {
-    // Helper: يبحث عن إجابة المستخدم لأي سؤال يحتوي أي كلمة من هالقائمة
+    // Helper function: يبحث عن إجابة بناءً على الكلمات المفتاحية
     const findAnswerTo = (keywords) => {
         const qIndex = conversationHistory.findIndex(
             m => m.role === 'model' && keywords.some(k => m.parts[0].text.toLowerCase().includes(k))
@@ -304,24 +304,22 @@ authBtn.addEventListener('click', async () => {
             : '';
     };
 
-    // نخزن البيانات المستخرجة
+    // نحدد الأسئلة ونربطها مع الحقول الصح
     const extractedData = {
-        name: findAnswerTo(['full name', 'your name', 'name']),
-        title: findAnswerTo(['profession', 'job title', 'career']),
-        summary: findAnswerTo(['summary', 'about yourself', 'profile']),
-        skills: findAnswerTo(['skills', 'abilities', 'strengths'])
+        name: findAnswerTo(['full name', 'your name', 'اسمك']),
+        email: findAnswerTo(['email', 'إيميل']),
+        phone: findAnswerTo(['phone', 'رقم']),
+        title: findAnswerTo(['profession', 'job title', 'وظيفتك']),
+        summary: findAnswerTo(['summary', 'about yourself', 'profile', 'نبذة']),
+        skills: findAnswerTo(['skills', 'abilities', 'مهارات'])
     };
 
-    // إذا skills فاضية → نحط اقتراح
     if (!extractedData.skills || extractedData.skills.trim() === '') {
         extractedData.skills = "What do you think?";
     }
 
     await auth0Client.loginWithRedirect({ appState: { cvData: JSON.stringify(extractedData) } });
-});        directSignInBtn.addEventListener('click', async () => {
-            await auth0Client.loginWithRedirect();
-        });
-
+});
         const menu = document.getElementById('floatingMenu');
         if (window.matchMedia("(hover: hover)").matches) {
             menu.addEventListener('mouseenter', () => menu.classList.add('expanded'));
@@ -631,6 +629,8 @@ if (cvDataString) {
         document.getElementById('cv-name').value = user.name || cvData.name || '';
         document.getElementById('cv-title').value = cvData.title || '';
         document.getElementById('cv-summary').value = cvData.summary || '';
+        document.getElementById('cv-email').value = cvData.email || '';
+        document.getElementById('cv-phone').value = cvData.phone || '';
         document.getElementById('cv-skills').value = cvData.skills || 'What do you think?';
         localStorage.removeItem('cvInitialData');
     } catch (e) {
@@ -638,11 +638,8 @@ if (cvDataString) {
     }
 } else if (user) {
     document.getElementById('cv-name').value = user.name || '';
-}        addExperienceEntry();
-        addEducationEntry();
-        updatePreview();
-    }
-  </script>
+    document.getElementById('cv-email').value = user.email || '';
+}  </script>
 </body>
 </html>
 
