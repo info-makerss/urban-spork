@@ -117,14 +117,20 @@
     }
     .ai-check-btn:hover { color: #007aff; }
     /* --- FIX CV PREVIEW SIZE & CENTER --- */
+   
     #cv-preview-wrapper {
+      /* --- ADD THESE THREE LINES --- */
+      position: sticky;
+      top: 9rem; /* This controls the space from the top menu */
+      max-height: calc(100vh - 10rem); /* This limits the container's height */
+
+      /* --- YOUR EXISTING LINES STAY THE SAME --- */
       width: 100%;
       display: flex;
       justify-content: center;
       align-items: start;
       padding: 2rem;
     }
-
     #cv-preview {
       width: 210mm;   /* عرض ورقة A4 */
       height: 297mm;  /* طول ورقة A4 */
