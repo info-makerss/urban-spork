@@ -116,41 +116,36 @@
         padding: 0.5rem;
     }
     .ai-check-btn:hover { color: #007aff; }
-    /* --- CV PREVIEW SIZE FIX (A4 Layout) --- */
+    /* --- FIX CV PREVIEW SIZE & CENTER --- */
     #cv-preview-wrapper {
       width: 100%;
-      max-width: 800px;
-      margin: 0 auto;
       display: flex;
       justify-content: center;
-      align-items: flex-start;
-      background-color: #f9fafb;
+      align-items: start;
       padding: 2rem;
-      border-radius: 1rem;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     }
 
     #cv-preview {
-      width: 210mm;
-      height: 297mm;
+      width: 210mm;   /* عرض ورقة A4 */
+      height: 297mm;  /* طول ورقة A4 */
       background-color: white;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
-      overflow-y: auto;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.15);
       padding: 2rem;
-      transform: scale(0.95);
+      overflow-y: auto;
+      transform: scale(0.9);
       transform-origin: top center;
+      transition: all 0.3s ease;
     }
 
+    /* خله يتعدل على الشاشات الصغيرة */
     @media (max-width: 1024px) {
       #cv-preview {
         width: 100%;
         height: auto;
         transform: none;
       }
-    }
-  </style>
+    }  </style>
 </head>
 <body>
 
