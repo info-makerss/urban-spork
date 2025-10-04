@@ -23,7 +23,7 @@
       color: #1d1d1f;
     }
     html.dark body {
-      background-color: #111827; /* REFINED: Softer, more professional dark background */
+      background-color: #111827;
       color: #f5f5f7;
     }
 
@@ -103,6 +103,19 @@
         line-height: 1;
     }
     html.dark .remove-btn { color: #f87171; }
+    .input-with-ai-check { position: relative; }
+    .ai-check-btn {
+        position: absolute;
+        top: 50%;
+        right: 0.5rem;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #adb5bd;
+        cursor: pointer;
+        padding: 0.5rem;
+    }
+    .ai-check-btn:hover { color: #007aff; }
 
   </style>
 </head>
