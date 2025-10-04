@@ -397,8 +397,122 @@
             cvBuilderMenu.addEventListener('mouseleave', () => cvBuilderMenu.classList.remove('expanded'));
         }
 
-        function updatePreview() { /* ... */ }
-        
+        function updatePreview() {
+            const cvPreview = document.getElementById('cv-preview');
+            if (!cvPreview) return;
+
+            const name = document.getElementById('cv-name')?.value || '';
+            const title = document.getElementById('cv-title')?.value || '';
+            const phone = document.getElementById('cv-phone')?.value || '';
+            const email = document.getElementById('cv-email')?.value || '';
+            const address = document.getElementById('cv-address')?.value || '';
+            const linkedin = document.getElementById('cv-linkedin')?.value || '';
+            const summary = document.getElementById('cv-summary')?.value || '';
+            const skills = document.getElementById('cv-skills')?.value || '';
+
+            let experienceHtml = '';
+            document.querySelectorAll('#experience-entries .experience-entry').forEach(entry => {
+                const jobTitle = entry.querySelector('input[name="job-title"]').value;
+                const company = entry.querySelector('input[name="company"]').value;
+                const desc = entry.querySelector('textarea').value;
+                if (jobTitle || company) {
+                    experienceHtml += `
+                        <div class="mb-4">
+                            <h4 class="font-bold text-gray-800">${jobTitle || 'Job Title'}</h4>
+                            <p class="text-sm text-gray-600">${company || ''}</p>
+                            <ul class="list-disc pl-5 text-sm mt-1 text-gray-700">
+                                ${desc.split('\n').filter(l => l.trim()).map(l => `<li>${l.trim()}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `;
+                }
+            });
+
+            let educationHtml = '';
+            document.querySelectorAll('#education-entries .education-entry').forEach(entry => {
+                const degree = entry.querySelector('input[name="degree"]').value;
+                const institution = entry.querySelector('input[name="institution"]').value;
+                if (degree || institution) {
+                    educationHtml += `
+                        <div class="mb-2">
+                            <h4 class="font-bold text-gray-800">${degree || 'Degree'}</h4>
+                            <p class="text-sm text-gray-600">${institution || ''}</p>
+                        </div>
+                    `;
+                }
+            });
+
+            let trainingHtml = '';
+            document.querySelectorAll('#training-entries .training-entry').forEach(entry => {
+                const course = entry.querySelector('input[name="course-name"]').value;
+                const org = entry.querySelector('input[name="organization"]').value;
+                const year = entry.querySelector('input[name="year"]').value;
+                if (course || org) {
+                    trainingHtml += `
+                        <div class="mb-2">
+                            <h4 class="font-bold text-gray-800">${course || 'Course'}</h4>
+                            <p class="text-sm text-gray-600">${org || ''} ${year ? `(${year})` : ''}</p>
+                        </div>
+                    `;
+                }
+            });
+
+            cvPreview.innerHTML = `
+                <div class="p-6 text-left text-sm">
+                    <header class="flex items-center pb-6 border-b">
+                        <div class="flex-grow">
+                            <h1 class="text-4xl font-bold cv-preview-name text-gray-900">${name || 'Your Name'}</h1>
+                            <p class="text-gray-500 tracking-widest mt-1">${title || 'PROFESSIONAL TITLE'}</p>
+                        </div>
+                        <img id="preview-photo" src="https://placehold.co/100x100/e2e8f0/e2e8f0?text= " class="w-24 h-24 rounded-full object-cover bg-gray-200">
+                    </header>
+                    <main class="grid grid-cols-3 gap-6 mt-6">
+                        <div class="col-span-1 text-xs">
+                            <section class="mb-6">
+                                <h2 class="font-bold tracking-widest uppercase text-gray-500 mb-3">Contact</h2>
+                                <div class="space-y-2 text-gray-700">
+                                    ${address ? `<div><i class="fa-solid fa-map-marker-alt w-4 inline-block"></i> ${address}</div>` : ''}
+                                    ${phone ? `<div><i class="fa-solid fa-phone w-4 inline-block"></i> ${phone}</div>` : ''}
+                                    ${email ? `<div><i class="fa-solid fa-envelope w-4 inline-block"></i> ${email}</div>` : ''}
+                                    ${linkedin ? `<div><i class="fa-brands fa-linkedin w-4 inline-block"></i> ${linkedin.replace(/^(https?:\/\/)?(www\.)?/,'')}</div>` : ''}
+                                </div>
+                            </section>
+                            <section class="mb-6">
+                                <h2 class="font-bold tracking-widest uppercase text-gray-500 mb-3">Education</h2>
+                                <div class="space-y-3">${educationHtml || '<p class="text-gray-500">Your education here...</p>'}</div>
+                            </section>
+                            <section class="mb-6">
+                                <h2 class="font-bold tracking-widest uppercase text-gray-500 mb-3">Training Courses</h2>
+                                <div class="space-y-3">${trainingHtml || '<p class="text-gray-500">Your courses here...</p>'}</div>
+                            </section>
+                            <section>
+                                <h2 class="font-bold tracking-widest uppercase text-gray-500 mb-3">Skills</h2>
+                                <ul class="space-y-1 list-inside text-gray-700">${skills.split(',').filter(s => s.trim()).map(s => `<li>${s.trim()}</li>`).join('')}</ul>
+                            </section>
+                        </div>
+                        <div class="col-span-2">
+                            <section class="mb-6">
+                                <h2 class="font-bold tracking-widest uppercase text-gray-500 mb-3">Professional Profile</h2>
+                                <p class="text-xs leading-relaxed text-gray-700">${summary || 'Your summary here...'}</p>
+                            </section>
+                            <section>
+                                <h2 class="font-bold tracking-widest uppercase text-gray-500 mb-3">Work Experience</h2>
+                                <div class="space-y-4">${experienceHtml || '<p class="text-gray-500">Your work experience here...</p>'}</div>
+                            </section>
+                        </div>
+                    </main>
+                </div>
+            `;
+
+            // Photo preview
+            const photoInput = document.getElementById('cv-photo');
+            const photoPreview = document.getElementById('preview-photo');
+            if (photoInput && photoInput.files && photoInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = e => { if(photoPreview) photoPreview.src = e.target.result; }
+                reader.readAsDataURL(photoInput.files[0]);
+            }
+        }
         document.querySelectorAll('.tt-ai-input, #cv-photo').forEach(input => input.addEventListener('input', updatePreview));
         document.getElementById('add-experience').addEventListener('click', addExperienceEntry);
         document.getElementById('add-education').addEventListener('click', addEducationEntry);
@@ -519,13 +633,12 @@
             const result = await response.json();
             return result.candidates?.[0]?.content?.parts?.[0]?.text;
         }
-        
-        addExperienceEntry();
-        addEducationEntry();
-        addTrainingEntry();
-        updatePreview();
-    }
-  </script>
+      addExperienceEntry();
+      addEducationEntry();
+      addTrainingEntry();
+      updatePreview();
+      document.querySelectorAll('.tt-ai-input').forEach(el => el.dispatchEvent(new Event('input')));
+      }  </script>
 </body>
 </html>
 
