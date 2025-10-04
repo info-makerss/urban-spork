@@ -91,14 +91,14 @@
        background-color: #1c1c1e;
        border: 1px solid #2c2c2e;
     }
-    .remove-btn { 
+    .remove-btn {
         position: absolute;
         top: 0.5rem;
         right: 0.5rem;
-        color: #dc3545; 
-        background: none; 
-        border: none; 
-        cursor: pointer; 
+        color: #dc3545;
+        background: none;
+        border: none;
+        cursor: pointer;
         font-size: 1.5rem;
         line-height: 1;
     }
@@ -284,7 +284,7 @@
         const icon = themeToggle.querySelector('i');
         const setTheme = (isDark) => {
             const html = document.documentElement;
-            if (isDark) { html.classList.add("dark"); icon.className = "fa-solid fa-moon"; localStorage.setItem('theme', 'dark'); } 
+            if (isDark) { html.classList.add("dark"); icon.className = "fa-solid fa-moon"; localStorage.setItem('theme', 'dark'); }
             else { html.classList.remove("dark"); icon.className = "fa-solid fa-sun"; localStorage.setItem('theme', 'light'); }
         };
         const savedTheme = localStorage.getItem('theme');
@@ -353,6 +353,11 @@
                             <button id="add-education" class="tt-ai-btn-add">+ Add Education</button>
                         </div>
                         <div>
+                            <h3 class="text-xl font-semibold mb-4 text-blue-600 dark:text-blue-400">Training Courses</h3>
+                            <div id="training-entries" class="space-y-4"></div>
+                            <button id="add-training" class="tt-ai-btn-add">+ Add Training</button>
+                        </div>
+                        <div>
                             <h3 class="text-xl font-semibold mb-4 text-blue-600 dark:text-blue-400">Skills</h3>
                             <textarea id="cv-skills" placeholder="List skills, separated by commas..." class="tt-ai-input h-24"></textarea>
                              <button class="tt-ai-btn-enhance" data-target="cv-skills" data-prompt="Rewrite the following list of skills for a CV, making them more professional and comma-separated. Do not use bullet points or stars.">✨ Enhance with AI</button>
@@ -379,7 +384,7 @@
         const icon = cvThemeToggle.querySelector('i');
         const setTheme = (isDark) => {
             const html = document.documentElement;
-            if (isDark) { html.classList.add("dark"); icon.className = "fa-solid fa-moon"; localStorage.setItem('theme', 'dark'); } 
+            if (isDark) { html.classList.add("dark"); icon.className = "fa-solid fa-moon"; localStorage.setItem('theme', 'dark'); }
             else { html.classList.remove("dark"); icon.className = "fa-solid fa-sun"; localStorage.setItem('theme', 'light'); }
         };
         const savedTheme = localStorage.getItem('theme');
@@ -397,6 +402,7 @@
         document.querySelectorAll('.tt-ai-input, #cv-photo').forEach(input => input.addEventListener('input', updatePreview));
         document.getElementById('add-experience').addEventListener('click', addExperienceEntry);
         document.getElementById('add-education').addEventListener('click', addEducationEntry);
+        document.getElementById('add-training').addEventListener('click', addTrainingEntry);
         document.querySelector('.form-section').addEventListener('click', (e) => {
             if (e.target.matches('.tt-ai-btn-enhance')) {
                 const targetId = e.target.dataset.target;
@@ -461,6 +467,29 @@
             entryDiv.querySelectorAll('input').forEach(el => el.addEventListener('input', updatePreview));
             updatePreview();
         }
+        function addTrainingEntry() {
+            const container = document.getElementById('training-entries');
+            const entryDiv = document.createElement('div');
+            entryDiv.className = 'training-entry border dark:border-gray-600 p-4 rounded-lg relative';
+            entryDiv.innerHTML = `
+                <button class="remove-btn">&times;</button>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="input-with-ai-check">
+                        <input type="text" name="course-name" placeholder="Course Name" class="tt-ai-input">
+                        <button class="ai-check-btn" title="AI Check Spelling">✨</button>
+                    </div>
+                    <div class="input-with-ai-check">
+                        <input type="text" name="organization" placeholder="Training Organization" class="tt-ai-input">
+                        <button class="ai-check-btn" title="AI Check Spelling">✨</button>
+                    </div>
+                </div>
+                <input type="text" name="year" placeholder="Year or Duration" class="tt-ai-input mt-4">
+            `;
+            container.appendChild(entryDiv);
+            entryDiv.querySelector('.remove-btn').addEventListener('click', () => { entryDiv.remove(); updatePreview(); });
+            entryDiv.querySelectorAll('input').forEach(el => el.addEventListener('input', updatePreview));
+            updatePreview();
+        }
 
         async function enhanceText(textarea, prompt) { /* ... */ }
         
@@ -493,9 +522,11 @@
         
         addExperienceEntry();
         addEducationEntry();
+        addTrainingEntry();
         updatePreview();
     }
   </script>
 </body>
 </html>
+
 
