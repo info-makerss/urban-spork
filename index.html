@@ -72,14 +72,14 @@
        background-color: #1f2937;
        border: 1px solid #374151;
     }
-    .remove-btn { 
+    .remove-btn {
         position: absolute;
         top: 0.5rem;
         right: 0.5rem;
-        color: #ef4444; 
-        background: none; 
-        border: none; 
-        cursor: pointer; 
+        color: #ef4444;
+        background: none;
+        border: none;
+        cursor: pointer;
         font-size: 1.5rem;
         line-height: 1;
     }
@@ -251,7 +251,7 @@
             }
         } catch (e) {
             console.error("Error updating UI:", e);
-            showPage('1'); 
+            showPage('1');
             initializeHomepage();
         }
     }
@@ -344,7 +344,7 @@
     }
 
     async function getAiResponse(prompt, type = 'chat') {
-        if (!GEMINI_API_KEY || GEMINI_API_KEY.includes("YOUR_GEMINI_API_KEY")) {
+        if (!GEMINI_API_KEY || GEMINI_API_KEY.includes("AIzaSyDhSlx-QeN6V36XbBR34iqyMz4F42Hx8UY")) {
              throw new Error("Gemini API Key is not set.");
         }
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
@@ -665,4 +665,5 @@
 </script>
 </body>
 </html>
+
 
