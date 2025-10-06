@@ -347,7 +347,7 @@
         if (!GEMINI_API_KEY || GEMINI_API_KEY.includes("AIzaSyDhSlx-QeN6V36XbBR34iqyMz4F42Hx8UY")) {
              throw new Error("Gemini API Key is not set.");
         }
-        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
         
         let system_prompt = `You are a helpful career advisor for a website called Talent Tag AI. Keep your answers concise (2-3 sentences) and focused on CVs, job searching, and interview preparation. Question: "${prompt}"`;
 
@@ -665,5 +665,6 @@
 </script>
 </body>
 </html>
+
 
 
