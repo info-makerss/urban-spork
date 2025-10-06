@@ -10,6 +10,10 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <!-- Auth0 SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@auth0/auth0-spa-js@2.0/dist/auth0-spa-js.production.js"></script>
+  <!-- QR Code Generator -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -91,14 +95,14 @@
        background-color: #1c1c1e;
        border: 1px solid #2c2c2e;
     }
-    .remove-btn { 
+    .remove-btn {
         position: absolute;
         top: 0.5rem;
         right: 0.5rem;
-        color: #dc3545; 
-        background: none; 
-        border: none; 
-        cursor: pointer; 
+        color: #dc3545;
+        background: none;
+        border: none;
+        cursor: pointer;
         font-size: 1.5rem;
         line-height: 1;
     }
@@ -149,10 +153,38 @@
             </div>
         </main>
     </div>
+    <!-- Page 2: Username & QR setup -->
+    <div id="page-2" class="hidden">
+      <main class="min-h-screen flex flex-col justify-center items-center px-4 pt-28 text-center">
+        <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-2xl w-full max-w-md">
+          <h2 class="text-2xl font-bold mb-4 text-blue-600 dark:text-blue-400">Choose Your Username</h2>
+          <p class="text-sm text-gray-500 mb-6">This will be used to create your unique profile link and QR code.</p>
 
-    <!-- Page 2: CV Builder -->
-    <div id="page-2" class="hidden"></div>
-  
+          <input id="usernameInput" type="text" placeholder="Enter your username..."
+            class="tt-ai-input mb-4 text-center font-semibold" maxlength="20">
+
+          <button id="generateQRBtn"
+            class="px-6 py-3 bg-blue-600 text-white rounded-full font-semibold hover:bg-blue-700 transition">
+            Generate QR Code
+          </button>
+
+          <div id="qrSection" class="hidden mt-8">
+            <p class="text-sm text-gray-600 mb-2">Your unique link:</p>
+            <a id="userUrl" href="#" target="_blank" class="block mb-4 text-blue-500 break-words"></a>
+            <div id="qrcode" class="mx-auto"></div>
+
+            <button id="nextToBuilderBtn"
+              class="mt-8 px-6 py-3 bg-green-600 text-white rounded-full font-semibold hover:bg-green-700 transition">
+              Next →
+            </button>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Page 3: CV Builder -->
+    <div id="page-3" class="hidden"></div>
+    
   <script>
     // --- APP STATE & CONFIG ---
     let auth0Client = null;
@@ -180,28 +212,28 @@
 
         const isAuthenticated = await auth0Client.isAuthenticated();
         if(isAuthenticated) {
-            showPage(2);
-        } else {
+            showPage(2); // Now opens username setup first
+        }        } else {
             showPage(1);
             initializeHomepage();
         }
     });
 
-    function showPage(page) {
+      function showPage(page) {
         const page1 = document.getElementById('page-1');
         const page2 = document.getElementById('page-2');
-        if(page === 1) {
-            page1.classList.remove('hidden');
-            page2.classList.add('hidden');
-        } else {
-            page1.classList.add('hidden');
-            page2.classList.remove('hidden');
-            if(page2.innerHTML.trim() === '') {
-                injectCvBuilder(page2);
-            }
-        }
-    }
+        const page3 = document.getElementById('page-3');
+        
+        [page1, page2, page3].forEach(p => p?.classList.add('hidden'));
 
+        if (page === 1) page1.classList.remove('hidden');
+        if (page === 2) page2.classList.remove('hidden');
+        if (page === 3) {
+          page3.classList.remove('hidden');
+          if (page3.innerHTML.trim() === '') injectCvBuilder(page3);
+        }
+      }
+      
     function initializeHomepage() {
         const createCvBtn = document.getElementById("createCvBtn");
         createCvBtn.addEventListener('click', async () => await auth0Client.loginWithRedirect());
@@ -275,7 +307,7 @@
         const icon = themeToggle.querySelector('i');
         const setTheme = (isDark) => {
             const html = document.documentElement;
-            if (isDark) { html.classList.add("dark"); icon.className = "fa-solid fa-moon"; localStorage.setItem('theme', 'dark'); } 
+            if (isDark) { html.classList.add("dark"); icon.className = "fa-solid fa-moon"; localStorage.setItem('theme', 'dark'); }
             else { html.classList.remove("dark"); icon.className = "fa-solid fa-sun"; localStorage.setItem('theme', 'light'); }
         };
         const savedTheme = localStorage.getItem('theme');
@@ -288,7 +320,43 @@
         
         addMessage("Welcome! Ask me anything about writing a great CV or preparing for your next interview.", "ai");
     }
+      document.addEventListener('DOMContentLoaded', () => {
+        const generateBtn = document.getElementById('generateQRBtn');
+        const nextBtn = document.getElementById('nextToBuilderBtn');
+        const qrSection = document.getElementById('qrSection');
+        const userUrl = document.getElementById('userUrl');
+        const usernameInput = document.getElementById('usernameInput');
 
+        let qr;
+
+        if (generateBtn) {
+          generateBtn.addEventListener('click', () => {
+            const username = usernameInput.value.trim();
+            if (!username) { alert('Please enter a username'); return; }
+
+            const uniqueUrl = `${window.location.origin}/user/${username}`;
+            userUrl.textContent = uniqueUrl;
+            userUrl.href = uniqueUrl;
+
+            if (!qr) qr = new QRious({ element: document.createElement('canvas'), size: 180 });
+            qr.value = uniqueUrl;
+            const qrCanvas = qr.element;
+            const qrContainer = document.getElementById('qrcode');
+            qrContainer.innerHTML = '';
+            qrContainer.appendChild(qrCanvas);
+
+            qrSection.classList.remove('hidden');
+          });
+        }
+
+        if (nextBtn) {
+          nextBtn.addEventListener('click', () => {
+            localStorage.setItem('userUsername', usernameInput.value.trim());
+            showPage(3);
+          });
+        }
+      });
+      
     async function injectCvBuilder(container) {
         const user = await auth0Client.getUser();
 
@@ -370,7 +438,7 @@
         const icon = cvThemeToggle.querySelector('i');
         const setTheme = (isDark) => {
             const html = document.documentElement;
-            if (isDark) { html.classList.add("dark"); icon.className = "fa-solid fa-moon"; localStorage.setItem('theme', 'dark'); } 
+            if (isDark) { html.classList.add("dark"); icon.className = "fa-solid fa-moon"; localStorage.setItem('theme', 'dark'); }
             else { html.classList.remove("dark"); icon.className = "fa-solid fa-sun"; localStorage.setItem('theme', 'light'); }
         };
         const savedTheme = localStorage.getItem('theme');
@@ -603,4 +671,5 @@
   </script>
 </body>
 </html>
+
 
