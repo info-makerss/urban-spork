@@ -1,115 +1,641 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Talent Tag AI – Your Career, Reimagined</title>
-  
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <!-- Auth0 SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/@auth0/auth0-spa-js@2.0/dist/auth0-spa-js.production.js"></script>
-  
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Talent Tag AI – Your Career, Reimagined</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <!-- Auth0 SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@auth0/auth0-spa-js@2.0/dist/auth0-spa-js.production.js"></script>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 
-  <style>
-    /* --- CORE STYLES --- */
-    body {
-      font-family: 'Inter', sans-serif;
-      background-color: #f5f5f7;
-      color: #1d1d1f;
-      transition: background-color 0.3s, color 0.3s;
-    }
-    html.dark body {
-      background-color: #111827;
-      color: #f5f5f7;
-    }
+  <style>
+    /* --- CORE STYLES --- */
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f5f5f7;
+      color: #1d1d1f;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    html.dark body {
+      background-color: #111827;
+      color: #f5f5f7;
+    }
 
-    /* --- DYNAMIC ISLAND & FLOATING MENUS --- */
-    .floating-island {
-      background: rgba(255,255,255,0.7);
-      backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-      border: 1px solid rgba(0,0,0,0.08);
-      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    html.dark .floating-island {
-      background: rgba(29,29,31,0.75);
-      border: 1px solid rgba(255,255,255,0.1);
-    }
-    .floating-island nav {
-      max-width: 0; opacity: 0; overflow: hidden; white-space: nowrap;
-      transition: max-width 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
-    }
-    .floating-island.expanded nav {
-      max-width: 500px; opacity: 1;
-      transition: max-width 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease 0.1s;
-    }
-    html:not(.dark) .floating-island a, html:not(.dark) .floating-island button { color: #000000 !important; }
+    /* --- DYNAMIC ISLAND & FLOATING MENUS --- */
+    .floating-island {
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(0,0,0,0.08);
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    html.dark .floating-island {
+      background: rgba(29,29,31,0.75);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .floating-island nav {
+      max-width: 0; opacity: 0; overflow: hidden; white-space: nowrap;
+      transition: max-width 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
+    }
+    .floating-island.expanded nav {
+      max-width: 500px; opacity: 1;
+      transition: max-width 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease 0.1s;
+    }
+    html:not(.dark) .floating-island a, html:not(.dark) .floating-island button { color: #000000 !important; }
 
-    /* --- SIRI ORB BACKGROUND --- */
-    .siri-orb-container { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 600px; height: 600px; filter: blur(80px); opacity: 0.6; z-index: -1; }
-    html.dark .siri-orb-container { opacity: 0.7; }
-    .orb { position: absolute; width: 100%; height: 100%; border-radius: 50%; mix-blend-mode: screen; }
-    .orb-1 { background: radial-gradient(circle, #ff82c2, transparent 60%); animation: move1 15s infinite alternate; }
-    .orb-2 { background: radial-gradient(circle, #8c72ff, transparent 60%); animation: move2 15s infinite alternate; }
-    .orb-3 { background: radial-gradient(circle, #60efff, transparent 60%); animation: move3 15s infinite alternate; }
-    @keyframes move1 { 0% { transform: translate(0, 0) scale(1); } 50% { transform: translate(150px, 50px) scale(0.8); } 100% { transform: translate(-50px, -100px) scale(1.2); } }
-    @keyframes move2 { 0% { transform: translate(0, 0) scale(1); } 50% { transform: translate(-100px, -80px) scale(1.3); } 100% { transform: translate(120px, 100px) scale(0.9); } }
-    @keyframes move3 { 0% { transform: translate(0, 0) scale(1); } 50% { transform: translate(50px, 150px) scale(1.1); } 100% { transform: translate(-120px, -50px) scale(0.8); } }
+    /* --- SIRI ORB BACKGROUND --- */
+    .siri-orb-container { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 600px; height: 600px; filter: blur(80px); opacity: 0.6; z-index: -1; }
+    html.dark .siri-orb-container { opacity: 0.7; }
+    .orb { position: absolute; width: 100%; height: 100%; border-radius: 50%; mix-blend-mode: screen; }
+    .orb-1 { background: radial-gradient(circle, #ff82c2, transparent 60%); animation: move1 15s infinite alternate; }
+    .orb-2 { background: radial-gradient(circle, #8c72ff, transparent 60%); animation: move2 15s infinite alternate; }
+    .orb-3 { background: radial-gradient(circle, #60efff, transparent 60%); animation: move3 15s infinite alternate; }
+    @keyframes move1 { 0% { transform: translate(0, 0) scale(1); } 50% { transform: translate(150px, 50px) scale(0.8); } 100% { transform: translate(-50px, -100px) scale(1.2); } }
+    @keyframes move2 { 0% { transform: translate(0, 0) scale(1); } 50% { transform: translate(-100px, -80px) scale(1.3); } 100% { transform: translate(120px, 100px) scale(0.9); } }
+    @keyframes move3 { 0% { transform: translate(0, 0) scale(1); } 50% { transform: translate(50px, 150px) scale(1.1); } 100% { transform: translate(-120px, -50px) scale(0.8); } }
 
-    /* --- CHAT & UI COMPONENTS --- */
-    .user-msg { background: #007aff; color: white; border-bottom-right-radius: 0.5rem; }
-    .ai-msg { background: #e5e5ea; color: #000000; border-bottom-left-radius: 0.5rem; }
-    html.dark .ai-msg { background: #2c2c2e; color: #f5f5f7; }
-    .chat-bubble { padding: 0.75rem 1.25rem; border-radius: 1.25rem; max-width: 85%; margin-bottom: 0.5rem; line-height: 1.5; white-space: pre-wrap; }
-    .typing-indicator { display: flex; align-items: center; }
-    .typing-indicator span { height: 8px; width: 8px; margin: 0 2px; background-color: #8e8e93; display: block; border-radius: 50%; opacity: 0.4; animation: typing 1s infinite; }
-    html.dark .typing-indicator span { background-color: #98989e; }
-    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
-    .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes typing { 0%, 100% { opacity: 0.4; transform: scale(0.7); } 50% { opacity: 1; transform: scale(1); } }
+    /* --- CHAT & UI COMPONENTS --- */
+    .user-msg { background: #007aff; color: white; border-bottom-right-radius: 0.5rem; }
+    .ai-msg { background: #e5e5ea; color: #000000; border-bottom-left-radius: 0.5rem; }
+    html.dark .ai-msg { background: #2c2c2e; color: #f5f5f7; }
+    .chat-bubble { padding: 0.75rem 1.25rem; border-radius: 1.25rem; max-width: 85%; margin-bottom: 0.5rem; line-height: 1.5; white-space: pre-wrap; }
+    .typing-indicator { display: flex; align-items: center; }
+    .typing-indicator span { height: 8px; width: 8px; margin: 0 2px; background-color: #8e8e93; display: block; border-radius: 50%; opacity: 0.4; animation: typing 1s infinite; }
+    html.dark .typing-indicator span { background-color: #98989e; }
+    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typing { 0%, 100% { opacity: 0.4; transform: scale(0.7); } 50% { opacity: 1; transform: scale(1); } }
+    
+    /* --- CV BUILDER PAGE STYLES --- */
+    .cv-preview-name { font-family: 'Playfair Display', serif; }
+    .tt-ai-input { padding: 0.75rem; border: 1px solid #ced4da; background-color: #ffffff; border-radius: 0.5rem; width: 100%; color: #212529; transition: all 0.2s ease; }
+    html.dark .tt-ai-input { background-color: #2c2c2e; border-color: #424245; color: #f5f5f7; }
+    .tt-ai-input:focus { outline: none; border-color: #007aff; box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.25); }
+    html.dark .tt-ai-input:focus { border-color: #0a84ff; box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.35); }
+    .tt-ai-btn-enhance { margin-top: 0.5rem; background-color: #e7f5ff; color: #007aff; font-weight: 600; padding: 0.5rem 1rem; border-radius: 0.5rem; transition: background-color 0.3s ease; font-size: 0.875rem; }
+    html.dark .tt-ai-btn-enhance { background-color: rgba(10, 132, 255, 0.2); color: #0a84ff; }
+    .tt-ai-btn-add { margin-top: 0.5rem; background-color: #e9ecef; color: #495057; font-weight: 600; padding: 0.5rem 1rem; border-radius: 0.5rem; transition: background-color 0.3s ease; }
+    html.dark .tt-ai-btn-add { background-color: #2c2c2e; color: #f5f5f7; }
+    .form-section {
+      background-color: #ffffff;
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
+    html.dark .form-section {
+       background-color: #1c1c1e;
+       border: 1px solid #2c2c2e;
+    }
+    .remove-btn { 
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        color: #dc3545; 
+        background: none; 
+        border: none; 
+        cursor: pointer; 
+        font-size: 1.5rem;
+        line-height: 1;
+    }
+    html.dark .remove-btn { color: #f87171; }
+    .label-text {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+  </style>
+</head>
+<body class="antialiased">
+
+  <div id="app-container">
+    <div class="siri-orb-container">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div id="page-1">
+        <header id="floatingMenu" class="floating-island fixed top-4 left-1/2 -translate-x-1/2 z-50 rounded-full p-2 flex items-center gap-4 shadow-xl shadow-black/5">
+            <a href="#" class="font-semibold text-md dark:text-white pl-3 pr-1 shrink-0">🌐 Talent Tag AI</a>
+            <nav class="hidden md:flex items-center gap-1 bg-black/5 dark:bg-white/5 p-1 rounded-full">
+              <a href="#" class="px-4 py-1.5 text-sm dark:text-gray-300 hover:bg-black/10 dark:hover:bg-white/10 rounded-full transition-colors">About</a>
+              <a href="#" class="px-4 py-1.5 text-sm dark:text-gray-300 hover:bg-black/10 dark:hover:bg-white/10 rounded-full transition-colors">Book Mock Interview</a>
+            </nav>
+            <div class="flex items-center gap-1">
+              <button id="themeToggle" aria-label="Toggle color theme" class="text-lg w-10 h-10 flex items-center justify-center rounded-full dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+                  <i class="fa-solid fa-sun"></i>
+              </button>
+              <button id="directSignInBtn" class="px-4 py-1.5 text-sm font-semibold bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 rounded-full transition-colors">
+                Sign In
+              </button>
+            </div>
+        </header>
+
+        <main class="min-h-screen flex flex-col justify-center items-center text-center px-4 pt-32 pb-16 relative z-10">
+            <h1 class="text-5xl md:text-7xl font-bold mb-6">Your Career, Reimagined.</h1>
+            <p class="text-lg md:text-xl mb-8 max-w-2xl">Craft a standout professional CV in minutes. Your career, accelerated by AI.</p>
+            <button id="createCvBtn" class="px-8 py-4 mb-16 text-lg font-semibold bg-blue-600 text-white rounded-full hover:bg-blue-700 active:scale-95 transition-all transform shadow-lg">
+                Create Your CV with AI
+            </button>
+
+            <div class="w-full max-w-3xl bg-white/60 dark:bg-black/50 backdrop-blur-2xl border border-black/10 dark:border-white/10 rounded-2xl shadow-2xl shadow-black/5 p-6 flex flex-col gap-4">
+              <p class="font-semibold text-left">Or, ask our AI advisor anything about CVs or interview preparation:</p>
+              <div id="chatOutput" class="flex flex-col h-60 overflow-y-auto pr-2"></div>
+              <div id="chatInputContainer" class="flex items-center gap-3 border-t border-black/10 dark:border-white/10 pt-4">
+                <input id="chatInput" type="text" placeholder="Ask a question..." class="flex-1 px-5 py-3 rounded-full border-0 bg-black/5 dark:bg-white/5 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-black dark:text-white placeholder:text-gray-500 dark:placeholder:text-white/40">
+                <button id="sendBtn" title="Send Message" aria-label="Send message" class="p-3 w-12 h-12 flex-shrink-0 rounded-full bg-blue-600 text-white hover:bg-blue-700 active:scale-95 transition-all transform"><i class="fa-solid fa-paper-plane"></i></button>
+              </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Page 2: Choose Username -->
+    <div id="page-username" class="hidden"></div>
+    
+    <!-- Page 3: CV Builder -->
+    <div id="page-cv-builder" class="hidden"></div>
+  
+<script>
+    // --- APP STATE & CONFIG ---
+    let auth0Client = null;
     
-    /* --- CV BUILDER PAGE STYLES --- */
-    .cv-preview-name { font-family: 'Playfair Display', serif; }
-    .tt-ai-input { padding: 0.75rem; border: 1px solid #ced4da; background-color: #ffffff; border-radius: 0.5rem; width: 100%; color: #212529; transition: all 0.2s ease; }
-    html.dark .tt-ai-input { background-color: #2c2c2e; border-color: #424245; color: #f5f5f7; }
-    .tt-ai-input:focus { outline: none; border-color: #007aff; box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.25); }
-    html.dark .tt-ai-input:focus { border-color: #0a84ff; box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.35); }
-    .tt-ai-btn-enhance { margin-top: 0.5rem; background-color: #e7f5ff; color: #007aff; font-weight: 600; padding: 0.5rem 1rem; border-radius: 0.5rem; transition: background-color 0.3s ease; font-size: 0.875rem; }
-    html.dark .tt-ai-btn-enhance { background-color: rgba(10, 132, 255, 0.2); color: #0a84ff; }
-    .tt-ai-btn-add { margin-top: 0.5rem; background-color: #e9ecef; color: #495057; font-weight: 600; padding: 0.5rem 1rem; border-radius: 0.5rem; transition: background-color 0.3s ease; }
-    html.dark .tt-ai-btn-add { background-color: #2c2c2e; color: #f5f5f7; }
-    .form-section {
-      background-color: #ffffff;
-      padding: 2rem;
-      border-radius: 1rem;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    // IMPORTANT: Replace with your actual Auth0 and Gemini details
+    const AUTH0_DOMAIN = "dev-bfz0zszo2hm0hh48.us.auth0.com";
+    const AUTH0_CLIENT_ID = "9jCHjLnFHK2lWSVfebOlSmntqC5aAZ3h";
+    // Make sure you have a valid Gemini API Key here
+    const GEMINI_API_KEY = "AIzaSyDhSlx-QeN6V36XbBR34iqyMz4F42Hx8UY"; 
+        
+    // --- MAIN APP LOGIC ---
+    document.addEventListener('DOMContentLoaded', async () => {
+        // --- THEME ---
+        const themeToggle = document.getElementById('themeToggle');
+        const sunIcon = '<i class="fa-solid fa-sun"></i>';
+        const moonIcon = '<i class="fa-solid fa-moon"></i>';
+
+        const applyTheme = (theme) => {
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+                if (themeToggle) themeToggle.innerHTML = sunIcon;
+            } else {
+                document.documentElement.classList.remove('dark');
+                if (themeToggle) themeToggle.innerHTML = moonIcon;
+            }
+        };
+
+        if (themeToggle) {
+            themeToggle.addEventListener('click', () => {
+                const isDarkMode = document.documentElement.classList.contains('dark');
+                localStorage.setItem('theme', isDarkMode ? 'light' : 'dark');
+                applyTheme(isDarkMode ? 'light' : 'dark');
+            });
+        }
+        
+        // Apply saved theme on load
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        applyTheme(savedTheme);
+
+        try {
+            auth0Client = await auth0.createAuth0Client({
+                domain: AUTH0_DOMAIN,
+                clientId: AUTH0_CLIENT_ID,
+                authorizationParams: { redirect_uri: window.location.origin }
+            });
+
+            if (location.search.includes("state=") && location.search.includes("code=")) {
+                await auth0Client.handleRedirectCallback();
+                window.history.replaceState({}, document.title, "/");
+            }
+        } catch (e) { console.error("Error initializing Auth0 client:", e); }
+
+        updateUI();
+    });
+    
+    async function updateUI() {
+        try {
+            const isAuthenticated = await auth0Client.isAuthenticated();
+            if (isAuthenticated) {
+                const username = localStorage.getItem('talentTagUsername');
+                if (username) {
+                    showPage('cv-builder');
+                } else {
+                    showPage('username');
+                }
+            } else {
+                showPage('1');
+                initializeHomepage();
+            }
+        } catch (e) {
+            console.error("Error updating UI:", e);
+            showPage('1'); // Fallback to homepage on error
+            initializeHomepage();
+        }
     }
-    html.dark .form-section {
-       background-color: #1c1c1e;
-       border: 1px solid #2c2c2e;
+
+    function showPage(pageId) {
+        ['1', 'username', 'cv-builder'].forEach(id => {
+            const page = document.getElementById(`page-${id}`);
+            if(page) page.classList.add('hidden');
+        });
+
+        const targetPage = document.getElementById(`page-${pageId}`);
+        if(targetPage) {
+            targetPage.classList.remove('hidden');
+            // Inject content only if the page is empty to avoid re-rendering
+            if (pageId === 'username' && targetPage.innerHTML.trim() === '') {
+                injectUsernamePage(targetPage);
+            } else if (pageId === 'cv-builder' && targetPage.innerHTML.trim() === '') {
+                injectCvBuilder(targetPage);
+            }
+        }
     }
-    .remove-btn {
-        position: absolute;
-        top: 0.5rem;
-        right: 0.5rem;
-        color: #dc3545;
-        background: none;
-        border: none;
-        cursor: pointer;
-        font-size: 1.5rem;
-        line-height: 1;
+
+    function initializeHomepage() {
+        const createCvBtn = document.getElementById("createCvBtn");
+        if (createCvBtn) createCvBtn.addEventListener('click', async () => await auth0Client.loginWithRedirect());
+        
+        const directSignInBtn = document.getElementById("directSignInBtn");
+        if (directSignInBtn) directSignInBtn.addEventListener('click', async () => await auth0Client.loginWithRedirect());
+        
+        // Chat functionality
+        const sendBtn = document.getElementById('sendBtn');
+        const chatInput = document.getElementById('chatInput');
+        if (sendBtn) sendBtn.addEventListener('click', handleChatSend);
+        if (chatInput) chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleChatSend();
+        });
     }
-    html.dark .remove-btn { color: #f87171; }
-    .label-text {
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-        display: block;
+
+    // --- START OF NEW CHAT FUNCTIONS ---
+    async function handleChatSend() {
+        const chatOutput = document.getElementById('chatOutput');
+        const chatInput = document.getElementById('chatInput');
+        const message = chatInput.value.trim();
+
+        if (!message || !chatOutput) return;
+
+        // Display the user's message
+        const userMsg = document.createElement('div');
+        userMsg.className = 'chat-bubble user-msg self-end';
+        userMsg.textContent = message;
+        chatOutput.appendChild(userMsg);
+        chatInput.value = '';
+        chatOutput.scrollTop = chatOutput.scrollHeight;
+
+        // Show a typing indicator
+        const typingIndicator = document.createElement('div');
+        typingIndicator.id = 'typing-indicator';
+        typingIndicator.className = 'chat-bubble ai-msg self-start typing-indicator';
+        typingIndicator.innerHTML = '<span></span><span></span><span></span>';
+        chatOutput.appendChild(typingIndicator);
+        chatOutput.scrollTop = chatOutput.scrollHeight;
+
+        try {
+            // Get the AI's response
+            const aiResponse = await getAiResponse(message);
+
+            // Remove the typing indicator
+            typingIndicator.remove();
+
+            // Display the AI's message
+            const aiMsg = document.createElement('div');
+            aiMsg.className = 'chat-bubble ai-msg self-start';
+            aiMsg.textContent = aiResponse;
+            chatOutput.appendChild(aiMsg);
+            chatOutput.scrollTop = chatOutput.scrollHeight;
+
+        } catch (error) {
+            // Handle errors (e.g., invalid API key)
+            typingIndicator.remove();
+            const errorMsg = document.createElement('div');
+            errorMsg.className = 'chat-bubble ai-msg self-start';
+            errorMsg.textContent = "Sorry, I couldn't connect to the AI. Please check the API key and try again.";
+            chatOutput.appendChild(errorMsg);
+            chatOutput.scrollTop = chatOutput.scrollHeight;
+            console.error("Error getting AI response:", error);
+        }
     }
-  </style>
+
+    async function getAiResponse(prompt) {
+        if (!GEMINI_API_KEY || GEMINI_API_KEY === "YOUR_GEMINI_API_KEY") {
+             throw new Error("Gemini API Key is not set.");
+        }
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
+
+        const requestBody = {
+            contents: [{
+                parts: [{
+                    text: `You are a helpful career advisor for a website called Talent Tag AI. Keep your answers concise (2-3 sentences) and focused on CVs, job searching, and interview preparation. Question: "${prompt}"`
+                }]
+            }]
+        };
+
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestBody)
+        });
+
+        if (!response.ok) {
+            throw new Error(`API call failed with status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0]) {
+             return data.candidates[0].content.parts[0].text;
+        } else {
+            return "I'm sorry, I am unable to provide a response to that question.";
+        }
+    }
+    // --- END OF NEW CHAT FUNCTIONS ---
+    
+    async function injectUsernamePage(container) {
+        container.innerHTML = `
+            <main class="min-h-screen flex flex-col justify-center items-center text-center px-4">
+                <div class="w-full max-w-md bg-white/60 dark:bg-black/50 backdrop-blur-2xl border border-black/10 dark:border-white/10 rounded-2xl shadow-2xl p-8 space-y-6">
+                    <h1 class="text-3xl font-bold">Choose Your Username</h1>
+                    <p class="text-gray-600 dark:text-gray-400">This will be your unique URL for your Talent Tag AI profile.</p>
+                    <div>
+                        <div class="flex items-center border-2 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 dark:border-gray-700">
+                            <span class="px-3 text-gray-500">talent-tag.ai/</span>
+                            <input id="username-input" type="text" placeholder="your-name" class="flex-1 p-2 bg-transparent focus:outline-none text-black dark:text-white">
+                        </div>
+                        <p id="username-error" class="text-xs text-red-500 mt-1 h-4"></p>
+                    </div>
+                    <button id="next-to-builder-btn" class="w-full px-6 py-3 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-all disabled:bg-gray-400" disabled>Next</button>
+                </div>
+            </main>
+        `;
+
+        const usernameInput = document.getElementById('username-input');
+        const nextBtn = document.getElementById('next-to-builder-btn');
+        const errorMsg = document.getElementById('username-error');
+
+        usernameInput.addEventListener('input', () => {
+            const username = usernameInput.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+            usernameInput.value = username;
+            if (username.length < 3) {
+                nextBtn.disabled = true;
+                errorMsg.textContent = 'Username must be at least 3 characters.';
+            } else {
+                nextBtn.disabled = false;
+                errorMsg.textContent = '';
+            }
+        });
+        
+        nextBtn.addEventListener('click', () => {
+            const username = usernameInput.value;
+            localStorage.setItem('talentTagUsername', username);
+            showPage('cv-builder');
+        });
+    }
+
+    async function injectCvBuilder(container) {
+        const username = localStorage.getItem('talentTagUsername') || 'your-name';
+        container.innerHTML = `
+        <div class="w-full min-h-screen bg-gray-100 dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
+            <header class="flex justify-between items-center mb-6">
+                <h1 class="text-2xl font-bold">Talent Tag AI CV Builder</h1>
+                <div class="flex items-center gap-4">
+                    <span class="text-sm text-gray-600 dark:text-gray-400 hidden sm:block">talent-tag.ai/${username}</span>
+                    <button id="downloadPdfBtn" class="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">Download PDF</button>
+                    <button id="logoutBtn" class="px-4 py-2 text-sm font-semibold bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Logout</button>
+                </div>
+            </header>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Form Column -->
+                <div class="space-y-6">
+                    <div class="form-section space-y-4">
+                        <h2 class="text-xl font-semibold border-b pb-2">Personal Details</h2>
+                        <div><label class="label-text" for="fullName">Full Name</label><input type="text" id="fullName" class="tt-ai-input" data-preview="preview-fullName"></div>
+                        <div><label class="label-text" for="jobTitle">Job Title</label><input type="text" id="jobTitle" class="tt-ai-input" data-preview="preview-jobTitle"></div>
+                        <div><label class="label-text" for="email">Email</label><input type="email" id="email" class="tt-ai-input" data-preview="preview-email"></div>
+                        <div><label class="label-text" for="phone">Phone</label><input type="tel" id="phone" class="tt-ai-input" data-preview="preview-phone"></div>
+                        <div><label class="label-text" for="location">Location</label><input type="text" id="location" class="tt-ai-input" data-preview="preview-location"></div>
+                        <div>
+                            <label class="label-text" for="summary">Professional Summary</label>
+                            <textarea id="summary" class="tt-ai-input h-32" data-preview="preview-summary"></textarea>
+                            <button class="tt-ai-btn-enhance" data-target="summary">✨ Enhance with AI</button>
+                        </div>
+                    </div>
+
+                    <div class="form-section space-y-4">
+                        <h2 class="text-xl font-semibold border-b pb-2">Work Experience</h2>
+                        <div id="workExperienceContainer"></div>
+                        <button id="addWorkExp" class="tt-ai-btn-add w-full">Add Experience</button>
+                    </div>
+                     <div class="form-section space-y-4">
+                        <h2 class="text-xl font-semibold border-b pb-2">Education</h2>
+                        <div id="educationContainer"></div>
+                        <button id="addEducation" class="tt-ai-btn-add w-full">Add Education</button>
+                    </div>
+
+                    <div class="form-section space-y-4">
+                        <h2 class="text-xl font-semibold border-b pb-2">Skills</h2>
+                        <div>
+                           <textarea id="skills" placeholder="e.g., JavaScript, React, Project Management..." class="tt-ai-input h-24" data-preview="preview-skills"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preview Column -->
+                <div class="sticky top-8">
+                    <div id="cv-preview" class="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-8 aspect-[210/297] overflow-y-auto">
+                       <header class="text-center border-b dark:border-gray-600 pb-4 mb-4">
+                           <h1 id="preview-fullName" class="text-4xl font-bold cv-preview-name text-gray-800 dark:text-white">Your Name</h1>
+                           <h2 id="preview-jobTitle" class="text-xl text-blue-600 dark:text-blue-400 font-semibold">Job Title</h2>
+                           <div class="flex justify-center gap-x-6 gap-y-2 text-xs mt-2 text-gray-600 dark:text-gray-400 flex-wrap">
+                               <span id="preview-email">your.email@example.com</span>
+                               <span id="preview-phone">+123456789</span>
+                               <span id="preview-location">City, Country</span>
+                           </div>
+                       </header>
+                       <section>
+                           <h3 class="text-lg font-bold text-gray-700 dark:text-gray-300 border-b-2 border-blue-500 pb-1 mb-2">Summary</h3>
+                           <p id="preview-summary" class="text-sm text-gray-600 dark:text-gray-400">A brief professional summary will appear here.</p>
+                       </section>
+                       <section class="mt-4">
+                           <h3 class="text-lg font-bold text-gray-700 dark:text-gray-300 border-b-2 border-blue-500 pb-1 mb-2">Work Experience</h3>
+                           <div id="preview-workExperience" class="space-y-3"></div>
+                       </section>
+                        <section class="mt-4">
+                           <h3 class="text-lg font-bold text-gray-700 dark:text-gray-300 border-b-2 border-blue-500 pb-1 mb-2">Education</h3>
+                           <div id="preview-education" class="space-y-3"></div>
+                       </section>
+                       <section class="mt-4">
+                           <h3 class="text-lg font-bold text-gray-700 dark:text-gray-300 border-b-2 border-blue-500 pb-1 mb-2">Skills</h3>
+                           <p id="preview-skills" class="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap">A list of skills will appear here.</p>
+                       </section>
+                    </div>
+                </div>
+            </div>
+        </div>
+        `;
+
+        setupCvBuilderListeners();
+    }
+    
+    function setupCvBuilderListeners() {
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('talentTagUsername');
+            auth0Client.logout({ logoutParams: { returnTo: window.location.origin } });
+        });
+        
+        document.getElementById('downloadPdfBtn').addEventListener('click', () => {
+             const element = document.getElementById('cv-preview');
+             const fullName = document.getElementById('fullName').value || 'cv';
+             const opt = {
+                margin:       0.5,
+                filename:     `${fullName.replace(/ /g, '_')}_talent_tag_cv.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+            html2pdf().from(element).set(opt).save();
+        });
+
+        // Live preview updates
+        document.querySelectorAll('.tt-ai-input').forEach(input => {
+            input.addEventListener('input', (e) => {
+                const previewId = e.target.dataset.preview;
+                if (previewId) {
+                    const previewEl = document.getElementById(previewId);
+                    if (previewEl) {
+                        previewEl.textContent = e.target.value;
+                    }
+                }
+            });
+        });
+        
+        // Dynamic section additions
+        let workExpCount = 0;
+        document.getElementById('addWorkExp').addEventListener('click', () => {
+            workExpCount++;
+            const container = document.getElementById('workExperienceContainer');
+            const newBlock = createWorkExperienceBlock(workExpCount);
+            container.insertAdjacentHTML('beforeend', newBlock);
+            updateWorkExperiencePreview();
+        });
+
+        let eduCount = 0;
+        document.getElementById('addEducation').addEventListener('click', () => {
+            eduCount++;
+            const container = document.getElementById('educationContainer');
+            const newBlock = createEducationBlock(eduCount);
+            container.insertAdjacentHTML('beforeend', newBlock);
+            updateEducationPreview();
+        });
+        
+        // Use event delegation for remove buttons and live preview of dynamic items
+        const formContainer = document.querySelector('#page-cv-builder');
+        formContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('remove-btn-work')) {
+                e.target.closest('.work-experience-item').remove();
+                updateWorkExperiencePreview();
+            }
+             if (e.target.classList.contains('remove-btn-edu')) {
+                e.target.closest('.education-item').remove();
+                updateEducationPreview();
+            }
+        });
+        
+        formContainer.addEventListener('input', (e) => {
+            if (e.target.closest('.work-experience-item')) {
+                updateWorkExperiencePreview();
+            }
+            if (e.target.closest('.education-item')) {
+                updateEducationPreview();
+            }
+             if (e.target.id === 'skills') {
+                document.getElementById('preview-skills').innerText = e.target.value;
+            }
+        });
+    }
+
+    function createWorkExperienceBlock(id) {
+        return `
+        <div class="work-experience-item border-t pt-4 mt-4 relative space-y-3">
+            <button class="remove-btn remove-btn-work">&times;</button>
+            <input type="text" placeholder="Job Title" class="tt-ai-input work-title">
+            <input type="text" placeholder="Company" class="tt-ai-input work-company">
+            <input type="text" placeholder="Location" class="tt-ai-input work-location">
+            <input type="text" placeholder="Dates (e.g., Jan 2020 - Present)" class="tt-ai-input work-dates">
+            <textarea placeholder="Responsibilities and achievements..." class="tt-ai-input h-24 work-desc"></textarea>
+        </div>`;
+    }
+
+    function createEducationBlock(id) {
+         return `
+        <div class="education-item border-t pt-4 mt-4 relative space-y-3">
+            <button class="remove-btn remove-btn-edu">&times;</button>
+            <input type="text" placeholder="Degree or Certificate" class="tt-ai-input edu-degree">
+            <input type="text" placeholder="Institution" class="tt-ai-input edu-institution">
+            <input type="text" placeholder="Dates (e.g., Aug 2016 - May 2020)" class="tt-ai-input edu-dates">
+        </div>`;
+    }
+
+    function updateWorkExperiencePreview() {
+        const previewContainer = document.getElementById('preview-workExperience');
+        const items = document.querySelectorAll('.work-experience-item');
+        previewContainer.innerHTML = '';
+        items.forEach(item => {
+            const title = item.querySelector('.work-title').value;
+            const company = item.querySelector('.work-company').value;
+            const location = item.querySelector('.work-location').value;
+            const dates = item.querySelector('.work-dates').value;
+            const desc = item.querySelector('.work-desc').value;
+
+            if (title || company) {
+                 previewContainer.innerHTML += `
+                <div class="text-sm">
+                    <div class="flex justify-between items-baseline">
+                        <h4 class="font-bold text-gray-800 dark:text-gray-200">${title}</h4>
+                        <span class="text-xs font-medium text-gray-500 dark:text-gray-400">${dates}</span>
+                    </div>
+                    <div class="flex justify-between items-baseline">
+                      <p class="italic text-gray-600 dark:text-gray-300">${company}</p>
+                      <p class="text-xs italic text-gray-500 dark:text-gray-400">${location}</p>
+                    </div>
+                    <ul class="list-disc list-inside text-gray-600 dark:text-gray-400 mt-1">
+                        ${desc.split('\\n').map(line => line.trim() ? `<li>${line}</li>` : '').join('')}
+                    </ul>
+                </div>`;
+            }
+        });
+    }
+
+    function updateEducationPreview() {
+        const previewContainer = document.getElementById('preview-education');
+        const items = document.querySelectorAll('.education-item');
+        previewContainer.innerHTML = '';
+        items.forEach(item => {
+            const degree = item.querySelector('.edu-degree').value;
+            const institution = item.querySelector('.edu-institution').value;
+            const dates = item.querySelector('.edu-dates').value;
+            if(degree || institution) {
+                previewContainer.innerHTML += `
+                 <div class="text-sm">
+                    <div class="flex justify-between items-baseline">
+                        <h4 class="font-bold text-gray-800 dark:text-gray-200">${degree}</h4>
+                        <span class="text-xs font-medium text-gray-500 dark:text-gray-400">${dates}</span>
+                    </div>
+                    <p class="italic text-gray-600 dark:text-gray-300">${institution}</p>
+                </div>
+                `
+            }
+        });
+    }
+</script>
+</body>
+</html>
+
 </head>
 <body class="antialiased">
 
