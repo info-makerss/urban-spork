@@ -92,14 +92,14 @@
        background-color: #1c1c1e;
        border: 1px solid #2c2c2e;
     }
-    .remove-btn { 
+    .remove-btn {
         position: absolute;
         top: 0.5rem;
         right: 0.5rem;
-        color: #dc3545; 
-        background: none; 
-        border: none; 
-        cursor: pointer; 
+        color: #dc3545;
+        background: none;
+        border: none;
+        cursor: pointer;
         font-size: 1.5rem;
         line-height: 1;
     }
@@ -268,18 +268,20 @@
         });
     }
 
-    function handleChatSend() {
-        // Basic chat placeholder
-        const chatOutput = document.getElementById('chatOutput');
-        const chatInput = document.getElementById('chatInput');
-        const message = chatInput.value.trim();
-        if(message && chatOutput) {
-            const userMsg = document.createElement('div');
-            userMsg.className = 'chat-bubble user-msg self-end';
-            userMsg.textContent = message;
-            chatOutput.appendChild(userMsg);
-            chatInput.value = '';
-            chatOutput.scrollTop = chatOutput.scrollHeight;
+      function handleChatSend() {
+          // Basic chat placeholder
+          const chatOutput = document.getElementById('chatOutput');
+          const chatInput = document.getElementById('chatInput');
+          const message = chatInput.value.trim();
+          if(message && chatOutput) {
+              const userMsg = document.createElement('div');
+              userMsg.className = 'chat-bubble user-msg self-end';
+              userMsg.textContent = message;
+              chatOutput.appendChild(userMsg);
+              chatInput.value = '';
+              chatOutput.scrollTop = chatOutput.scrollHeight;
+          }
+      }
         }
     }
     
@@ -564,3 +566,4 @@
   </script>
 </body>
 </html>
+
