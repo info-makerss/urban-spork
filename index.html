@@ -2,7 +2,7 @@
 <html lang="en" dir="ltr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale-1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Talent Tag AI – Your Career, Reimagined</title>
   
   <script src="https://cdn.tailwindcss.com"></script>
@@ -21,6 +21,7 @@
       font-family: 'Inter', sans-serif;
       background-color: #f5f5f7;
       color: #1d1d1f;
+      transition: background-color 0.3s, color 0.3s;
     }
     html.dark body {
       background-color: #111827;
@@ -103,10 +104,14 @@
         line-height: 1;
     }
     html.dark .remove-btn { color: #f87171; }
-
+    .label-text {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
   </style>
 </head>
-<body>
+<body class="antialiased">
 
   <div id="app-container">
     <div class="siri-orb-container">
@@ -160,12 +165,38 @@
     // --- APP STATE & CONFIG ---
     let auth0Client = null;
     
+    // IMPORTANT: Replace with your actual Auth0 and Gemini details
     const AUTH0_DOMAIN = "dev-bfz0zszo2hm0hh48.us.auth0.com";
     const AUTH0_CLIENT_ID = "9jCHjLnFHK2lWSVfebOlSmntqC5aAZ3h";
     const GEMINI_API_KEY = "AIzaSyDhSlx-QeN6V36XbBR34iqyMz4F42Hx8UY";
-    
+        
+    // --- THEME ---
+    const themeToggle = document.getElementById('themeToggle');
+    const sunIcon = '<i class="fa-solid fa-sun"></i>';
+    const moonIcon = '<i class="fa-solid fa-moon"></i>';
+
+    const applyTheme = (theme) => {
+        if (theme === 'dark') {
+            document.documentElement.classList.add('dark');
+            themeToggle.innerHTML = sunIcon;
+        } else {
+            document.documentElement.classList.remove('dark');
+            themeToggle.innerHTML = moonIcon;
+        }
+    };
+
+    themeToggle.addEventListener('click', () => {
+        const isDarkMode = document.documentElement.classList.contains('dark');
+        localStorage.setItem('theme', isDarkMode ? 'light' : 'dark');
+        applyTheme(isDarkMode ? 'light' : 'dark');
+    });
+
     // --- MAIN APP LOGIC ---
     document.addEventListener('DOMContentLoaded', async () => {
+        // Apply saved theme on load
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        applyTheme(savedTheme);
+
         try {
             auth0Client = await auth0.createAuth0Client({
                 domain: AUTH0_DOMAIN,
@@ -179,19 +210,29 @@
             }
         } catch (e) { console.error("Error initializing Auth0 client:", e); }
 
-        const isAuthenticated = await auth0Client.isAuthenticated();
-        if(isAuthenticated) {
-            const username = localStorage.getItem('talentTagUsername');
-            if (username) {
-                showPage('cv-builder');
+        updateUI();
+    });
+    
+    async function updateUI() {
+        try {
+            const isAuthenticated = await auth0Client.isAuthenticated();
+            if (isAuthenticated) {
+                const username = localStorage.getItem('talentTagUsername');
+                if (username) {
+                    showPage('cv-builder');
+                } else {
+                    showPage('username');
+                }
             } else {
-                showPage('username');
+                showPage('1');
+                initializeHomepage();
             }
-        } else {
-            showPage('1');
+        } catch (e) {
+            console.error("Error updating UI:", e);
+            showPage('1'); // Fallback to homepage on error
             initializeHomepage();
         }
-    });
+    }
 
     function showPage(pageId) {
         ['1', 'username', 'cv-builder'].forEach(id => {
@@ -202,6 +243,7 @@
         const targetPage = document.getElementById(`page-${pageId}`);
         if(targetPage) {
             targetPage.classList.remove('hidden');
+            // Inject content only if the page is empty to avoid re-rendering
             if (pageId === 'username' && targetPage.innerHTML.trim() === '') {
                 injectUsernamePage(targetPage);
             } else if (pageId === 'cv-builder' && targetPage.innerHTML.trim() === '') {
@@ -212,10 +254,33 @@
 
     function initializeHomepage() {
         const createCvBtn = document.getElementById("createCvBtn");
-        createCvBtn.addEventListener('click', async () => await auth0Client.loginWithRedirect());
+        if (createCvBtn) createCvBtn.addEventListener('click', async () => await auth0Client.loginWithRedirect());
         
         const directSignInBtn = document.getElementById("directSignInBtn");
-        directSignInBtn.addEventListener('click', async () => await auth0Client.loginWithRedirect());
+        if (directSignInBtn) directSignInBtn.addEventListener('click', async () => await auth0Client.loginWithRedirect());
+        
+        // Chat functionality
+        const sendBtn = document.getElementById('sendBtn');
+        const chatInput = document.getElementById('chatInput');
+        if (sendBtn) sendBtn.addEventListener('click', handleChatSend);
+        if (chatInput) chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleChatSend();
+        });
+    }
+
+    function handleChatSend() {
+        // Basic chat placeholder
+        const chatOutput = document.getElementById('chatOutput');
+        const chatInput = document.getElementById('chatInput');
+        const message = chatInput.value.trim();
+        if(message && chatOutput) {
+            const userMsg = document.createElement('div');
+            userMsg.className = 'chat-bubble user-msg self-end';
+            userMsg.textContent = message;
+            chatOutput.appendChild(userMsg);
+            chatInput.value = '';
+            chatOutput.scrollTop = chatOutput.scrollHeight;
+        }
     }
     
     async function injectUsernamePage(container) {
@@ -229,7 +294,7 @@
                             <span class="px-3 text-gray-500">talent-tag.ai/</span>
                             <input id="username-input" type="text" placeholder="your-name" class="flex-1 p-2 bg-transparent focus:outline-none text-black dark:text-white">
                         </div>
-                        <p class="text-xs text-gray-500 mt-1">Username must be at least 3 characters long.</p>
+                        <p id="username-error" class="text-xs text-red-500 mt-1 h-4"></p>
                     </div>
                     <button id="next-to-builder-btn" class="w-full px-6 py-3 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-all disabled:bg-gray-400" disabled>Next</button>
                 </div>
@@ -238,11 +303,18 @@
 
         const usernameInput = document.getElementById('username-input');
         const nextBtn = document.getElementById('next-to-builder-btn');
+        const errorMsg = document.getElementById('username-error');
 
         usernameInput.addEventListener('input', () => {
             const username = usernameInput.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
             usernameInput.value = username;
-            nextBtn.disabled = username.length < 3;
+            if (username.length < 3) {
+                nextBtn.disabled = true;
+                errorMsg.textContent = 'Username must be at least 3 characters.';
+            } else {
+                nextBtn.disabled = false;
+                errorMsg.textContent = '';
+            }
         });
         
         nextBtn.addEventListener('click', () => {
@@ -253,9 +325,242 @@
     }
 
     async function injectCvBuilder(container) {
-        // ... (The full injectCvBuilder function is here, with all features restored)
+        const username = localStorage.getItem('talentTagUsername') || 'your-name';
+        container.innerHTML = `
+        <div class="w-full min-h-screen bg-gray-100 dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
+            <header class="flex justify-between items-center mb-6">
+                <h1 class="text-2xl font-bold">Talent Tag AI CV Builder</h1>
+                <div class="flex items-center gap-4">
+                    <span class="text-sm text-gray-600 dark:text-gray-400 hidden sm:block">talent-tag.ai/${username}</span>
+                    <button id="downloadPdfBtn" class="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">Download PDF</button>
+                    <button id="logoutBtn" class="px-4 py-2 text-sm font-semibold bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Logout</button>
+                </div>
+            </header>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Form Column -->
+                <div class="space-y-6">
+                    <div class="form-section space-y-4">
+                        <h2 class="text-xl font-semibold border-b pb-2">Personal Details</h2>
+                        <div><label class="label-text" for="fullName">Full Name</label><input type="text" id="fullName" class="tt-ai-input" data-preview="preview-fullName"></div>
+                        <div><label class="label-text" for="jobTitle">Job Title</label><input type="text" id="jobTitle" class="tt-ai-input" data-preview="preview-jobTitle"></div>
+                        <div><label class="label-text" for="email">Email</label><input type="email" id="email" class="tt-ai-input" data-preview="preview-email"></div>
+                        <div><label class="label-text" for="phone">Phone</label><input type="tel" id="phone" class="tt-ai-input" data-preview="preview-phone"></div>
+                        <div><label class="label-text" for="location">Location</label><input type="text" id="location" class="tt-ai-input" data-preview="preview-location"></div>
+                        <div>
+                            <label class="label-text" for="summary">Professional Summary</label>
+                            <textarea id="summary" class="tt-ai-input h-32" data-preview="preview-summary"></textarea>
+                            <button class="tt-ai-btn-enhance" data-target="summary">✨ Enhance with AI</button>
+                        </div>
+                    </div>
+
+                    <div class="form-section space-y-4">
+                        <h2 class="text-xl font-semibold border-b pb-2">Work Experience</h2>
+                        <div id="workExperienceContainer"></div>
+                        <button id="addWorkExp" class="tt-ai-btn-add w-full">Add Experience</button>
+                    </div>
+                     <div class="form-section space-y-4">
+                        <h2 class="text-xl font-semibold border-b pb-2">Education</h2>
+                        <div id="educationContainer"></div>
+                        <button id="addEducation" class="tt-ai-btn-add w-full">Add Education</button>
+                    </div>
+
+                    <div class="form-section space-y-4">
+                        <h2 class="text-xl font-semibold border-b pb-2">Skills</h2>
+                        <div>
+                           <textarea id="skills" placeholder="e.g., JavaScript, React, Project Management..." class="tt-ai-input h-24" data-preview="preview-skills"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preview Column -->
+                <div class="sticky top-8">
+                    <div id="cv-preview" class="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-8 aspect-[210/297] overflow-y-auto">
+                       <header class="text-center border-b dark:border-gray-600 pb-4 mb-4">
+                           <h1 id="preview-fullName" class="text-4xl font-bold cv-preview-name text-gray-800 dark:text-white">Your Name</h1>
+                           <h2 id="preview-jobTitle" class="text-xl text-blue-600 dark:text-blue-400 font-semibold">Job Title</h2>
+                           <div class="flex justify-center gap-x-6 gap-y-2 text-xs mt-2 text-gray-600 dark:text-gray-400 flex-wrap">
+                               <span id="preview-email">your.email@example.com</span>
+                               <span id="preview-phone">+123456789</span>
+                               <span id="preview-location">City, Country</span>
+                           </div>
+                       </header>
+                       <section>
+                           <h3 class="text-lg font-bold text-gray-700 dark:text-gray-300 border-b-2 border-blue-500 pb-1 mb-2">Summary</h3>
+                           <p id="preview-summary" class="text-sm text-gray-600 dark:text-gray-400">A brief professional summary will appear here.</p>
+                       </section>
+                       <section class="mt-4">
+                           <h3 class="text-lg font-bold text-gray-700 dark:text-gray-300 border-b-2 border-blue-500 pb-1 mb-2">Work Experience</h3>
+                           <div id="preview-workExperience" class="space-y-3"></div>
+                       </section>
+                        <section class="mt-4">
+                           <h3 class="text-lg font-bold text-gray-700 dark:text-gray-300 border-b-2 border-blue-500 pb-1 mb-2">Education</h3>
+                           <div id="preview-education" class="space-y-3"></div>
+                       </section>
+                       <section class="mt-4">
+                           <h3 class="text-lg font-bold text-gray-700 dark:text-gray-300 border-b-2 border-blue-500 pb-1 mb-2">Skills</h3>
+                           <p id="preview-skills" class="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap">A list of skills will appear here.</p>
+                       </section>
+                    </div>
+                </div>
+            </div>
+        </div>
+        `;
+
+        setupCvBuilderListeners();
     }
+    
+    function setupCvBuilderListeners() {
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('talentTagUsername');
+            auth0Client.logout({ logoutParams: { returnTo: window.location.origin } });
+        });
+        
+        document.getElementById('downloadPdfBtn').addEventListener('click', () => {
+             const element = document.getElementById('cv-preview');
+             const fullName = document.getElementById('fullName').value || 'cv';
+             const opt = {
+                margin:       0.5,
+                filename:     `${fullName.replace(' ', '_')}_talent_tag_cv.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+            html2pdf().from(element).set(opt).save();
+        });
+
+        // Live preview updates
+        document.querySelectorAll('.tt-ai-input').forEach(input => {
+            input.addEventListener('input', (e) => {
+                const previewId = e.target.dataset.preview;
+                if (previewId) {
+                    const previewEl = document.getElementById(previewId);
+                    if (previewEl) {
+                        previewEl.textContent = e.target.value;
+                    }
+                }
+            });
+        });
+        
+        // Dynamic section additions
+        let workExpCount = 0;
+        document.getElementById('addWorkExp').addEventListener('click', () => {
+            workExpCount++;
+            const container = document.getElementById('workExperienceContainer');
+            const newBlock = createWorkExperienceBlock(workExpCount);
+            container.insertAdjacentHTML('beforeend', newBlock);
+            updateWorkExperiencePreview();
+        });
+
+        let eduCount = 0;
+        document.getElementById('addEducation').addEventListener('click', () => {
+            eduCount++;
+            const container = document.getElementById('educationContainer');
+            const newBlock = createEducationBlock(eduCount);
+            container.insertAdjacentHTML('beforeend', newBlock);
+            updateEducationPreview();
+        });
+        
+        // Use event delegation for remove buttons and live preview of dynamic items
+        const formContainer = document.querySelector('#page-cv-builder');
+        formContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('remove-btn-work')) {
+                e.target.closest('.work-experience-item').remove();
+                updateWorkExperiencePreview();
+            }
+             if (e.target.classList.contains('remove-btn-edu')) {
+                e.target.closest('.education-item').remove();
+                updateEducationPreview();
+            }
+        });
+        
+        formContainer.addEventListener('input', (e) => {
+            if (e.target.closest('.work-experience-item')) {
+                updateWorkExperiencePreview();
+            }
+            if (e.target.closest('.education-item')) {
+                updateEducationPreview();
+            }
+             if (e.target.id === 'skills') {
+                document.getElementById('preview-skills').innerText = e.target.value;
+            }
+        });
+    }
+
+    function createWorkExperienceBlock(id) {
+        return `
+        <div class="work-experience-item border-t pt-4 mt-4 relative space-y-3">
+            <button class="remove-btn remove-btn-work">&times;</button>
+            <input type="text" placeholder="Job Title" class="tt-ai-input work-title">
+            <input type="text" placeholder="Company" class="tt-ai-input work-company">
+            <input type="text" placeholder="Location" class="tt-ai-input work-location">
+            <input type="text" placeholder="Dates (e.g., Jan 2020 - Present)" class="tt-ai-input work-dates">
+            <textarea placeholder="Responsibilities and achievements..." class="tt-ai-input h-24 work-desc"></textarea>
+        </div>`;
+    }
+
+    function createEducationBlock(id) {
+         return `
+        <div class="education-item border-t pt-4 mt-4 relative space-y-3">
+            <button class="remove-btn remove-btn-edu">&times;</button>
+            <input type="text" placeholder="Degree or Certificate" class="tt-ai-input edu-degree">
+            <input type="text" placeholder="Institution" class="tt-ai-input edu-institution">
+            <input type="text" placeholder="Dates (e.g., Aug 2016 - May 2020)" class="tt-ai-input edu-dates">
+        </div>`;
+    }
+
+    function updateWorkExperiencePreview() {
+        const previewContainer = document.getElementById('preview-workExperience');
+        const items = document.querySelectorAll('.work-experience-item');
+        previewContainer.innerHTML = '';
+        items.forEach(item => {
+            const title = item.querySelector('.work-title').value;
+            const company = item.querySelector('.work-company').value;
+            const location = item.querySelector('.work-location').value;
+            const dates = item.querySelector('.work-dates').value;
+            const desc = item.querySelector('.work-desc').value;
+
+            if (title || company) {
+                 previewContainer.innerHTML += `
+                <div class="text-sm">
+                    <div class="flex justify-between items-baseline">
+                        <h4 class="font-bold text-gray-800 dark:text-gray-200">${title}</h4>
+                        <span class="text-xs font-medium text-gray-500 dark:text-gray-400">${dates}</span>
+                    </div>
+                    <div class="flex justify-between items-baseline">
+                      <p class="italic text-gray-600 dark:text-gray-300">${company}</p>
+                      <p class="text-xs italic text-gray-500 dark:text-gray-400">${location}</p>
+                    </div>
+                    <ul class="list-disc list-inside text-gray-600 dark:text-gray-400 mt-1">
+                        ${desc.split('\n').map(line => `<li>${line}</li>`).join('')}
+                    </ul>
+                </div>`;
+            }
+        });
+    }
+
+    function updateEducationPreview() {
+        const previewContainer = document.getElementById('preview-education');
+        const items = document.querySelectorAll('.education-item');
+        previewContainer.innerHTML = '';
+        items.forEach(item => {
+            const degree = item.querySelector('.edu-degree').value;
+            const institution = item.querySelector('.edu-institution').value;
+            const dates = item.querySelector('.edu-dates').value;
+            if(degree || institution) {
+                previewContainer.innerHTML += `
+                 <div class="text-sm">
+                    <div class="flex justify-between items-baseline">
+                        <h4 class="font-bold text-gray-800 dark:text-gray-200">${degree}</h4>
+                        <span class="text-xs font-medium text-gray-500 dark:text-gray-400">${dates}</span>
+                    </div>
+                    <p class="italic text-gray-600 dark:text-gray-300">${institution}</p>
+                </div>
+                `
+            }
+        });
+    }
+
   </script>
 </body>
 </html>
-
