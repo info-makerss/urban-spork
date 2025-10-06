@@ -28,44 +28,8 @@
       color: #f5f5f7;
     }
 
-    /* --- PAGE TRANSITIONS --- */
-    .page {
-        opacity: 1;
-        transition: opacity 0.4s ease-in-out;
-        width: 100%;
-    }
-    .page.hidden {
-        opacity: 0;
-        pointer-events: none;
-        position: absolute;
-        top: 0;
-        left: 0;
-        z-index: -1;
-    }
-
-    /* --- DYNAMIC ISLAND & FLOATING MENUS --- */
-    .floating-island {
-      background: rgba(255,255,255,0.7);
-      backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-      border: 1px solid rgba(0,0,0,0.08);
-      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    html.dark .floating-island {
-      background: rgba(29,29,31,0.75);
-      border: 1px solid rgba(255,255,255,0.1);
-    }
-    .floating-island nav {
-      max-width: 0; opacity: 0; overflow: hidden; white-space: nowrap;
-      transition: max-width 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
-    }
-    .floating-island.expanded nav {
-      max-width: 500px; opacity: 1;
-      transition: max-width 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease 0.1s;
-    }
-    html:not(.dark) .floating-island a, html:not(.dark) .floating-island button { color: #000000 !important; }
-
     /* --- SIRI ORB BACKGROUND --- */
-    .siri-orb-container { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 600px; height: 600px; filter: blur(80px); opacity: 0.6; z-index: -1; }
+    .siri-orb-container { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 600px; height: 600px; filter: blur(80px); opacity: 0.6; z-index: -1; }
     html.dark .siri-orb-container { opacity: 0.7; }
     .orb { position: absolute; width: 100%; height: 100%; border-radius: 50%; mix-blend-mode: screen; }
     .orb-1 { background: radial-gradient(circle, #ff82c2, transparent 60%); animation: move1 15s infinite alternate; }
@@ -94,6 +58,7 @@
     .tt-ai-input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25); }
     html.dark .tt-ai-input:focus { border-color: #60a5fa; box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.35); }
     .tt-ai-btn-enhance { margin-top: 0.5rem; background-color: #dbeafe; color: #2563eb; font-weight: 600; padding: 0.5rem 1rem; border-radius: 0.5rem; transition: background-color 0.3s ease; font-size: 0.875rem; }
+    .tt-ai-btn-enhance:disabled { opacity: 0.6; cursor: not-allowed; }
     html.dark .tt-ai-btn-enhance { background-color: rgba(96, 165, 250, 0.2); color: #60a5fa; }
     .tt-ai-btn-add { margin-top: 0.5rem; background-color: #e5e7eb; color: #374151; font-weight: 600; padding: 0.75rem 1rem; border-radius: 0.5rem; transition: background-color 0.3s ease; }
     html.dark .tt-ai-btn-add { background-color: #4b5563; color: #f3f4f6; }
@@ -163,22 +128,28 @@
         <div class="orb orb-3"></div>
     </div>
 
-    <div id="page-1" class="page">
-        <header id="floatingMenu" class="floating-island fixed top-4 left-1/2 -translate-x-1/2 z-50 rounded-full p-2 flex items-center gap-4 shadow-xl shadow-black/5">
-            <a href="#" class="font-semibold text-md dark:text-white pl-3 pr-1 shrink-0">🌐 Talent Tag AI</a>
-            <nav class="hidden md:flex items-center gap-1 bg-black/5 dark:bg-white/5 p-1 rounded-full">
-              <a href="#" class="px-4 py-1.5 text-sm dark:text-gray-300 hover:bg-black/10 dark:hover:bg-white/10 rounded-full transition-colors">About</a>
-              <a href="#" class="px-4 py-1.5 text-sm dark:text-gray-300 hover:bg-black/10 dark:hover:bg-white/10 rounded-full transition-colors">Book Mock Interview</a>
-            </nav>
-            <div class="flex items-center gap-1">
-              <button id="themeToggle" aria-label="Toggle color theme" class="text-lg w-10 h-10 flex items-center justify-center rounded-full dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-                  <i class="fa-solid fa-sun"></i>
-              </button>
-              <button id="directSignInBtn" class="px-4 py-1.5 text-sm font-semibold bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 rounded-full transition-colors">
-                Sign In
-              </button>
-            </div>
-        </header>
+    <div id="page-1">
+        <header id="main-header" class="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg shadow-sm">
+            <div class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <div class="flex items-center gap-8">
+                        <a href="#" class="font-bold text-lg text-gray-800 dark:text-white shrink-0">🌐 Talent Tag AI</a>
+                        <nav class="hidden md:flex items-center gap-2">
+                            <a href="#" class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors">About</a>
+                            <a href="#" class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors">Book Mock Interview</a>
+                        </nav>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button class="theme-toggle text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 text-lg w-10 h-10 flex items-center justify-center rounded-full transition-colors" aria-label="Toggle color theme">
+                            {/* Icon is set by JS */}
+                        </button>
+                        <button id="directSignInBtn" class="px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-full transition-colors">
+                            Sign In
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
 
         <main class="min-h-screen flex flex-col justify-center items-center text-center px-4 pt-32 pb-16 relative z-10">
             <h1 class="text-5xl md:text-7xl font-bold mb-6">Your Career, Reimagined.</h1>
@@ -199,10 +170,10 @@
     </div>
 
     <!-- Page 2: Choose Username -->
-    <div id="page-username" class="page hidden"></div>
+    <div id="page-username" class="hidden"></div>
     
     <!-- Page 3: CV Builder -->
-    <div id="page-cv-builder" class="page hidden"></div>
+    <div id="page-cv-builder" class="hidden"></div>
   
 <script>
     // --- APP STATE & CONFIG ---
@@ -211,37 +182,38 @@
     // IMPORTANT: Replace with your actual Auth0 and Gemini details
     const AUTH0_DOMAIN = "dev-bfz0zszo2hm0hh48.us.auth0.com";
     const AUTH0_CLIENT_ID = "9jCHjLnFHK2lWSVfebOlSmntqC5aAZ3h";
-    // Make sure you have a valid Gemini API Key here
-    const GEMINI_API_KEY = "AIzaSyDhSlx-QeN6V36XbBR34iqyMz4F42Hx8UY"; 
-        
+    const GEMINI_API_KEY = "AIzaSyDhSlx-QeN6V36XbBR34iqyMz4F42Hx8UY";
+    
+    // --- THEME LOGIC ---
+    const sunIcon = '<i class="fa-solid fa-sun"></i>';
+    const moonIcon = '<i class="fa-solid fa-moon"></i>';
+
+    function applyTheme(theme) {
+        const toggles = document.querySelectorAll('.theme-toggle');
+        if (theme === 'dark') {
+            document.documentElement.classList.add('dark');
+            toggles.forEach(toggle => { if (toggle) toggle.innerHTML = sunIcon; });
+        } else {
+            document.documentElement.classList.remove('dark');
+            toggles.forEach(toggle => { if (toggle) toggle.innerHTML = moonIcon; });
+        }
+    }
+
     // --- MAIN APP LOGIC ---
     document.addEventListener('DOMContentLoaded', async () => {
-        // --- THEME ---
-        const themeToggle = document.getElementById('themeToggle');
-        const sunIcon = '<i class="fa-solid fa-sun"></i>';
-        const moonIcon = '<i class="fa-solid fa-moon"></i>';
-
-        const applyTheme = (theme) => {
-            if (theme === 'dark') {
-                document.documentElement.classList.add('dark');
-                if (themeToggle) themeToggle.innerHTML = sunIcon;
-            } else {
-                document.documentElement.classList.remove('dark');
-                if (themeToggle) themeToggle.innerHTML = moonIcon;
-            }
-        };
-
-        if (themeToggle) {
-            themeToggle.addEventListener('click', () => {
-                const isDarkMode = document.documentElement.classList.contains('dark');
-                localStorage.setItem('theme', isDarkMode ? 'light' : 'dark');
-                applyTheme(isDarkMode ? 'light' : 'dark');
-            });
-        }
-        
         // Apply saved theme on load
         const savedTheme = localStorage.getItem('theme') || 'light';
         applyTheme(savedTheme);
+
+        // Use event delegation for any theme toggle button
+        document.body.addEventListener('click', e => {
+            if (e.target.closest('.theme-toggle')) {
+                const isDarkMode = document.documentElement.classList.contains('dark');
+                const newTheme = isDarkMode ? 'light' : 'dark';
+                localStorage.setItem('theme', newTheme);
+                applyTheme(newTheme);
+            }
+        });
 
         try {
             auth0Client = await auth0.createAuth0Client({
@@ -262,7 +234,6 @@
     async function updateUI() {
         try {
             if (!auth0Client) {
-                // If auth0Client is null, wait a bit and retry.
                 setTimeout(updateUI, 100);
                 return;
             }
@@ -280,25 +251,37 @@
             }
         } catch (e) {
             console.error("Error updating UI:", e);
-            showPage('1'); // Fallback to homepage on error
+            showPage('1'); 
             initializeHomepage();
         }
     }
 
     function showPage(pageId) {
-        ['1', 'username', 'cv-builder'].forEach(id => {
-            const page = document.getElementById(`page-${id}`);
-            if(page) page.classList.add('hidden');
+        const mainHeader = document.getElementById('main-header');
+        if (mainHeader) {
+            mainHeader.style.display = (pageId === '1') ? 'block' : 'none';
+        }
+
+        document.querySelectorAll('#app-container > div[id^="page-"]').forEach(page => {
+            if (page) page.classList.add('hidden');
         });
 
         const targetPage = document.getElementById(`page-${pageId}`);
-        if(targetPage) {
+        if (targetPage) {
             targetPage.classList.remove('hidden');
-            // Inject content only if the page is empty to avoid re-rendering
+            
+            let injected = false;
             if (pageId === 'username' && targetPage.innerHTML.trim() === '') {
                 injectUsernamePage(targetPage);
+                injected = true;
             } else if (pageId === 'cv-builder' && targetPage.innerHTML.trim() === '') {
                 injectCvBuilder(targetPage);
+                injected = true;
+            }
+
+            if (injected) {
+                const currentTheme = localStorage.getItem('theme') || 'light';
+                applyTheme(currentTheme);
             }
         }
     }
@@ -310,7 +293,6 @@
         const directSignInBtn = document.getElementById("directSignInBtn");
         if (directSignInBtn) directSignInBtn.addEventListener('click', async () => await auth0Client.loginWithRedirect());
         
-        // Chat functionality
         const sendBtn = document.getElementById('sendBtn');
         const chatInput = document.getElementById('chatInput');
         if (sendBtn) sendBtn.addEventListener('click', handleChatSend);
@@ -319,7 +301,7 @@
         });
     }
 
-    // --- START OF NEW CHAT FUNCTIONS ---
+    // --- CHAT FUNCTIONS ---
     async function handleChatSend() {
         const chatOutput = document.getElementById('chatOutput');
         const chatInput = document.getElementById('chatInput');
@@ -327,7 +309,6 @@
 
         if (!message || !chatOutput) return;
 
-        // Display the user's message
         const userMsg = document.createElement('div');
         userMsg.className = 'chat-bubble user-msg self-end';
         userMsg.textContent = message;
@@ -335,7 +316,6 @@
         chatInput.value = '';
         chatOutput.scrollTop = chatOutput.scrollHeight;
 
-        // Show a typing indicator
         const typingIndicator = document.createElement('div');
         typingIndicator.id = 'typing-indicator';
         typingIndicator.className = 'chat-bubble ai-msg self-start typing-indicator';
@@ -344,13 +324,8 @@
         chatOutput.scrollTop = chatOutput.scrollHeight;
 
         try {
-            // Get the AI's response
-            const aiResponse = await getAiResponse(message);
-
-            // Remove the typing indicator
+            const aiResponse = await getAiResponse(message, 'chat');
             typingIndicator.remove();
-
-            // Display the AI's message
             const aiMsg = document.createElement('div');
             aiMsg.className = 'chat-bubble ai-msg self-start';
             aiMsg.textContent = aiResponse;
@@ -358,7 +333,6 @@
             chatOutput.scrollTop = chatOutput.scrollHeight;
 
         } catch (error) {
-            // Handle errors (e.g., invalid API key)
             typingIndicator.remove();
             const errorMsg = document.createElement('div');
             errorMsg.className = 'chat-bubble ai-msg self-start';
@@ -369,18 +343,20 @@
         }
     }
 
-    async function getAiResponse(prompt) {
-        if (!GEMINI_API_KEY || GEMINI_API_KEY === "YOUR_GEMINI_API_KEY") {
+    async function getAiResponse(prompt, type = 'chat') {
+        if (!GEMINI_API_KEY || GEMINI_API_KEY.includes("YOUR_GEMINI_API_KEY")) {
              throw new Error("Gemini API Key is not set.");
         }
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
+        
+        let system_prompt = `You are a helpful career advisor for a website called Talent Tag AI. Keep your answers concise (2-3 sentences) and focused on CVs, job searching, and interview preparation. Question: "${prompt}"`;
+
+        if (type === 'summary') {
+            system_prompt = `Rewrite the following professional summary to be more impactful and concise for a resume. Keep it between 2-4 sentences. Original text: "${prompt}"`;
+        }
 
         const requestBody = {
-            contents: [{
-                parts: [{
-                    text: `You are a helpful career advisor for a website called Talent Tag AI. Keep your answers concise (2-3 sentences) and focused on CVs, job searching, and interview preparation. Question: "${prompt}"`
-                }]
-            }]
+            contents: [{ parts: [{ text: system_prompt }] }]
         };
 
         const response = await fetch(API_URL, {
@@ -388,20 +364,15 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(requestBody)
         });
-
-        if (!response.ok) {
-            throw new Error(`API call failed with status: ${response.status}`);
-        }
-
+        if (!response.ok) throw new Error(`API call failed with status: ${response.status}`);
         const data = await response.json();
-        
-        if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0]) {
-             return data.candidates[0].content.parts[0].text;
+        if (data.candidates && data.candidates[0]?.content?.parts[0]) {
+             return data.candidates[0].content.parts[0].text.trim();
         } else {
+             if (type === 'summary') throw new Error("Failed to get enhancement from AI.");
             return "I'm sorry, I am unable to provide a response to that question.";
         }
     }
-    // --- END OF NEW CHAT FUNCTIONS ---
     
     async function injectUsernamePage(container) {
         container.innerHTML = `
@@ -453,6 +424,9 @@
                     <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-200">CV Builder</h1>
                     <div class="flex items-center gap-4">
                         <span class="text-sm text-gray-600 dark:text-gray-400 hidden sm:block">talent-tag.ai/${username}</span>
+                        <button class="theme-toggle text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 text-lg w-10 h-10 flex items-center justify-center rounded-lg transition-colors" aria-label="Toggle color theme">
+                           {/* Icon is set by JS */}
+                        </button>
                         <button id="downloadPdfBtn" class="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm">Download PDF</button>
                         <button id="logoutBtn" class="px-4 py-2 text-sm font-semibold bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Logout</button>
                     </div>
@@ -553,39 +527,28 @@
             html2pdf().from(element).set(opt).save();
         });
 
-        // Live preview updates
         document.querySelectorAll('.tt-ai-input').forEach(input => {
             input.addEventListener('input', (e) => {
                 const previewId = e.target.dataset.preview;
                 if (previewId) {
                     const previewEl = document.getElementById(previewId);
-                    if (previewEl) {
-                        previewEl.textContent = e.target.value;
-                    }
+                    if (previewEl) previewEl.textContent = e.target.value;
                 }
             });
         });
         
-        // Dynamic section additions
-        let workExpCount = 0;
         document.getElementById('addWorkExp').addEventListener('click', () => {
-            workExpCount++;
             const container = document.getElementById('workExperienceContainer');
-            const newBlock = createWorkExperienceBlock(workExpCount);
-            container.insertAdjacentHTML('beforeend', newBlock);
+            container.insertAdjacentHTML('beforeend', createWorkExperienceBlock());
         });
 
-        let eduCount = 0;
         document.getElementById('addEducation').addEventListener('click', () => {
-            eduCount++;
             const container = document.getElementById('educationContainer');
-            const newBlock = createEducationBlock(eduCount);
-            container.insertAdjacentHTML('beforeend', newBlock);
+            container.insertAdjacentHTML('beforeend', createEducationBlock());
         });
         
-        // Use event delegation for remove buttons and live preview of dynamic items
         const formContainer = document.querySelector('#page-cv-builder');
-        formContainer.addEventListener('click', (e) => {
+        formContainer.addEventListener('click', async (e) => {
             if (e.target.matches('.remove-btn-work')) {
                 e.target.closest('.work-experience-item').remove();
                 updateWorkExperiencePreview();
@@ -594,22 +557,40 @@
                 e.target.closest('.education-item').remove();
                 updateEducationPreview();
             }
+            if (e.target.matches('.tt-ai-btn-enhance')) {
+                const button = e.target;
+                const targetId = button.dataset.target;
+                const targetTextarea = document.getElementById(targetId);
+
+                if (targetTextarea && targetTextarea.value.trim()) {
+                    const originalText = button.innerHTML;
+                    button.innerHTML = '✨ Enhancing...';
+                    button.disabled = true;
+
+                    try {
+                        const enhancedText = await getAiResponse(targetTextarea.value, targetId);
+                        targetTextarea.value = enhancedText;
+                        targetTextarea.dispatchEvent(new Event('input', { bubbles: true }));
+
+                    } catch (error) {
+                        console.error("Enhancement failed:", error);
+                        alert("Sorry, the AI enhancement failed. Please try again.");
+                    } finally {
+                        button.innerHTML = originalText;
+                        button.disabled = false;
+                    }
+                }
+            }
         });
         
         formContainer.addEventListener('input', (e) => {
-            if (e.target.closest('.work-experience-item')) {
-                updateWorkExperiencePreview();
-            }
-            if (e.target.closest('.education-item')) {
-                updateEducationPreview();
-            }
-             if (e.target.id === 'skills') {
-                document.getElementById('preview-skills').innerText = e.target.value;
-            }
+            if (e.target.closest('.work-experience-item')) updateWorkExperiencePreview();
+            if (e.target.closest('.education-item')) updateEducationPreview();
+            if (e.target.id === 'skills') document.getElementById('preview-skills').innerText = e.target.value;
         });
     }
 
-    function createWorkExperienceBlock(id) {
+    function createWorkExperienceBlock() {
         return `
         <div class="work-experience-item border-t pt-4 mt-4 relative space-y-3 dark:border-gray-600">
             <button class="remove-btn remove-btn-work">&times;</button>
@@ -621,7 +602,7 @@
         </div>`;
     }
 
-    function createEducationBlock(id) {
+    function createEducationBlock() {
          return `
         <div class="education-item border-t pt-4 mt-4 relative space-y-3 dark:border-gray-600">
             <button class="remove-btn remove-btn-edu">&times;</button>
@@ -684,5 +665,4 @@
 </script>
 </body>
 </html>
-
 
