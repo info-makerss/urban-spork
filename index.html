@@ -103,19 +103,6 @@
         line-height: 1;
     }
     html.dark .remove-btn { color: #f87171; }
-    .input-with-ai-check { position: relative; }
-    .ai-check-btn {
-        position: absolute;
-        top: 50%;
-        right: 0.5rem;
-        transform: translateY(-50%);
-        background: none;
-        border: none;
-        color: #adb5bd;
-        cursor: pointer;
-        padding: 0.5rem;
-    }
-    .ai-check-btn:hover { color: #007aff; }
 
   </style>
 </head>
@@ -201,14 +188,14 @@
                 showPage('username');
             }
         } else {
-            showPage('home');
+            showPage('1');
             initializeHomepage();
         }
     });
 
     function showPage(pageId) {
-        ['page-1', 'page-username', 'page-cv-builder'].forEach(id => {
-            const page = document.getElementById(id);
+        ['1', 'username', 'cv-builder'].forEach(id => {
+            const page = document.getElementById(`page-${id}`);
             if(page) page.classList.add('hidden');
         });
 
@@ -224,7 +211,11 @@
     }
 
     function initializeHomepage() {
-        // ... (Homepage logic remains unchanged)
+        const createCvBtn = document.getElementById("createCvBtn");
+        createCvBtn.addEventListener('click', async () => await auth0Client.loginWithRedirect());
+        
+        const directSignInBtn = document.getElementById("directSignInBtn");
+        directSignInBtn.addEventListener('click', async () => await auth0Client.loginWithRedirect());
     }
     
     async function injectUsernamePage(container) {
